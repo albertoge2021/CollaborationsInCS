@@ -41,7 +41,7 @@ async def get_work(work, session):
             for institutions in authorships["institutions"]:
                 if institutions["ror"]:
                     async with session.get(
-                        "http://10.0.0.154:9292/organizations/"
+                        "http://10.0.0.121:9292/organizations/"
                         + institutions["ror"].rsplit("/", 1)[1]
                     ) as resp:
                         req = await resp.json()
@@ -80,7 +80,7 @@ async def get_work(work, session):
             for institutions in authorships["institutions"]:
                 if institutions["ror"]:
                     async with session.get(
-                        "http://10.0.0.154:9292/organizations/"
+                        "http://10.0.0.121:9292/organizations/"
                         + institutions["ror"].rsplit("/", 1)[1]
                     ) as resp:
                         req = await resp.json()
@@ -119,7 +119,7 @@ async def get_work(work, session):
             for institutions in authorships["institutions"]:
                 if institutions["ror"]:
                     async with session.get(
-                        "http://10.0.0.154:9292/organizations/"
+                        "http://10.0.0.121:9292/organizations/"
                         + institutions["ror"].rsplit("/", 1)[1]
                     ) as resp:
                         req = await resp.json()
@@ -153,7 +153,7 @@ async def get_work(work, session):
                                     "lng": req["addresses"][0]["lng"],
                                 }
                             )
-    if ubication_list != []:
+    if ubication_list != [] and max(distances) > 0:
         citations = work["cited_by_count"] if work["cited_by_count"] else None
         df = df.append(
             pd.Series(
@@ -170,7 +170,7 @@ async def get_work(work, session):
             ),
             ignore_index=True,
         )
-    df.to_csv("cs.csv", mode="a", index=False, header=False)
+    df.to_csv("cs_all.csv", mode="a", index=False, header=False)
 
 
 async def get_page(page, session):
@@ -184,7 +184,7 @@ async def get_page(page, session):
 async def main():
     # results = Concepts().search_filter(display_name="computer science").get()
     works = (
-        Works().filter(concepts={"id": "C41008148"}).paginate(per_page=200, n_max=None)
+        Works().paginate(per_page=200, n_max=None)
     )
     header = pd.DataFrame(
         {
@@ -197,7 +197,7 @@ async def main():
             "distance": []
         }
     )
-    header.to_csv("cs.csv")
+    #header.to_csv("cs_all.csv")
     pagecon = 0
     async with aiohttp.ClientSession(
         connector=aiohttp.TCPConnector(ssl=False)

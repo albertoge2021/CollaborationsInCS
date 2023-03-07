@@ -12,7 +12,7 @@ from scipy.stats import shapiro
 # https://towardsdatascience.com/what-are-the-commonly-used-statistical-tests-in-data-science-a95cfc2e6b5e
 
 # Setup Data
-df = pd.read_csv("cs.csv")
+df = pd.read_csv("cs_all_test.csv")
 df = df[df["distance"] > 0]
 df = df[df["year"] > 1980]
 
@@ -101,9 +101,24 @@ Photo in folder
 Photo in folder
 """
 
+#Probabilty
+#sns.displot(new_df, x="dist_trunc", hue="type", stat="probability", common_norm=False)
+#plt.xlabel('Distance')
+#plt.show()
+"""
+Photo in folder
+"""
+
 #Histogram
 #ax = df.plot.hist(column=["distance"], by="type", figsize=(10, 8))
 #plt.show()
 """
 Photo in folder
+"""
+
+"""sns.histplot(
+    df, x="distance", y="citations",
+    bins=30, pthresh=.05, pmax=.9,
+)
+plt.show()
 """
