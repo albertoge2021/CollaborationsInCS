@@ -3,6 +3,7 @@ from ast import literal_eval
 import pycountry_convert as pc
 import warnings
 import statistics
+from geopy.distance import geodesic as GD
 from tqdm import tqdm
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
@@ -76,6 +77,25 @@ for row in tqdm(df.itertuples()):
 df.reset_index(drop=True)
 df.to_csv("cs_data.csv")"""
 
-df = pd.read_csv("cs_data.csv")
+"""df = pd.read_csv("cs_data.csv")
 df = df.drop_duplicates("work")
-df.to_csv("cs.csv")
+df.to_csv("cs.csv")"""
+
+df = pd.read_csv("cs.csv")
+
+for row in tqdm(df.itertuples()):
+    locations = literal_eval(row.location)
+    distances = []
+    distances_total = []
+    first_country = (locations[0]["lat"], locations[0]["lng"])
+    for country in locations[1:]:
+        country_coord = (country["lat"], country["lng"])
+        if country_coord == first_country or country_coord in distances:
+            continue
+        distances.append(country_coord)
+    for coord in distances:
+        distances_total.append(GD(first_country, coord).km)
+    df._set_value(row.Index,'mean_distance',statistics.mean(distances_total))
+
+df = df[df['mean_index'].notna()]
+df.to_csv("cs_mean.csv")

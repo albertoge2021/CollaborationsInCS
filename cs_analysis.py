@@ -1,3 +1,5 @@
+from ast import literal_eval
+import statistics
 import matplotlib.pyplot as plt
 import pandas as pd
 import pandas as pd
@@ -7,7 +9,10 @@ import numpy as np
 import scipy.stats as stats
 import pandas as pd 
 import seaborn as sns
+from geopy.distance import geodesic as GD
 import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from tqdm import tqdm
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
@@ -17,8 +22,7 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 
 # Setup Data
 dev_df = pd.read_csv("human_dev_standard.csv")
-df = pd.read_csv("cs.csv")
-df = df[df['mean_index'].notna()]
+df = pd.read_csv("cs_mean.csv")
 
 ## GENERAL ANALYSIS
 """
@@ -90,6 +94,34 @@ sns.histplot(
     bins=30, pthresh=.05, pmax=.9,
 )
 plt.show()
+
+unique_majors = df["type"].unique()
+for major in unique_majors:
+   print(major + " "+  str(stats.pearsonr(df[df['type'] == major]['citations'], df[df['type'] == major]['mean_distance'])))
+for major in unique_majors:
+   print(major + " "+  str(stats.spearmanr(df[df['type'] == major]['citations'], df[df['type'] == major]['mean_distance'])))
+
+print("Describe")
+print(df[["type","citations", "international"]].groupby(["type", "international"]).describe())
+unique_majors = df["type"].unique()
+for major in unique_majors:
+    print(major + str(stats.kruskal(df[(df['type'] == major) & (df['international'] == True)]['citations'],df[(df['type'] == major) & (df['international'] == False)]['citations'])))
+
+mixed_df = df[(df['type'] == "mixed")]
+sns.lmplot(
+    x="distance",
+    y="citations",
+    hue="international",
+    data=mixed_df,
+    scatter=False,
+)
+plt.show()
+    
+top_df_m = df[(df['type'] == "mixed")].sort_values(by=['citations'], ascending=False).head(1000)
+top_df_c = df[(df['type'] == "company")].sort_values(by=['citations'], ascending=False).head(1000)
+top_df_e = df[(df['type'] == "education")].sort_values(by=['citations'], ascending=False).head(1000)
+cs_df = pd.concat([top_df_m, top_df_e, top_df_c])
+print(cs_df[["type","citations", "international", "distance"]].groupby(["type", "international"]).describe())
 
 #endregion
 """
@@ -214,6 +246,32 @@ plt.show()
 # mean citations by development
 df.groupby(['no_dev', 'type'])['citations'].mean().unstack().plot(kind='bar')
 plt.show()
+
+print(df[["type","citations", "no_dev", "distance"]].groupby(["type", "no_dev"]).describe())
+no_dev_df = df[["type", "citations", "no_dev", "distance"]]
+no_dev_df.groupby(["type", "no_dev"])['citations'].count().unstack().plot.pie(
+    subplots=True,
+    autopct="%1.1f%%",
+    legend=False,
+    startangle=90,
+    figsize=(10, 7),
+)
+plt.show()
+no_dev_df.groupby(["type", "no_dev"])['citations'].sum().unstack().plot.pie(
+    subplots=True,
+    autopct="%1.1f%%",
+    legend=False,
+    startangle=90,
+    figsize=(10, 7),
+)
+plt.show()
+
+print(stats.kruskal(df[(df['type'] == "mixed") & (df['no_dev'] == False)]['citations'], df[(df['type'] == "mixed") & (df['no_dev'] == True)]['citations']))
+
+top_df_no_dev = df[(df['no_dev'] == True)].sort_values(by=['citations'], ascending=False).head(1000)
+top_df_dev = df[(df['no_dev'] == False)].sort_values(by=['citations'], ascending=False).head(1000)
+cs_df = pd.concat([top_df_no_dev, top_df_dev])
+print(cs_df[["type","citations", "no_dev", "distance"]].groupby(["type", "no_dev"]).describe())
 
 #endregion
 """
