@@ -41,7 +41,7 @@ async def get_work(work, session):
             for institutions in authorships["institutions"]:
                 if institutions["ror"]:
                     async with session.get(
-                        "http://10.0.0.121:9292/organizations/"
+                        "http://localhost:9292/organizations/"
                         + institutions["ror"].rsplit("/", 1)[1]
                     ) as resp:
                         req = await resp.json()
@@ -80,7 +80,7 @@ async def get_work(work, session):
             for institutions in authorships["institutions"]:
                 if institutions["ror"]:
                     async with session.get(
-                        "http://10.0.0.121:9292/organizations/"
+                        "http://localhost:9292/organizations/"
                         + institutions["ror"].rsplit("/", 1)[1]
                     ) as resp:
                         req = await resp.json()
@@ -119,7 +119,7 @@ async def get_work(work, session):
             for institutions in authorships["institutions"]:
                 if institutions["ror"]:
                     async with session.get(
-                        "http://10.0.0.121:9292/organizations/"
+                        "http://localhost:9292/organizations/"
                         + institutions["ror"].rsplit("/", 1)[1]
                     ) as resp:
                         req = await resp.json()
@@ -170,7 +170,7 @@ async def get_work(work, session):
             ),
             ignore_index=True,
         )
-    df.to_csv("cs_all.csv", mode="a", index=False, header=False)
+    df.to_csv("cs_0.csv", mode="a", index=False, header=False)
 
 
 async def get_page(page, session):
@@ -197,7 +197,7 @@ async def main():
             "distance": []
         }
     )
-    #header.to_csv("cs_all.csv")
+    #header.to_csv("cs_0.csv")
     pagecon = 0
     async with aiohttp.ClientSession(
         connector=aiohttp.TCPConnector(ssl=False)

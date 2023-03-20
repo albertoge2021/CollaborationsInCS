@@ -1,16 +1,16 @@
 from ast import literal_eval
+from collections import Counter
 import statistics
-import matplotlib.pyplot as plt
 import pandas as pd
-import pandas as pd
-import matplotlib.pyplot as plt
 import warnings
 import numpy as np
 import scipy.stats as stats
-import pandas as pd 
+from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.spatial.distance import pdist, squareform
 import seaborn as sns
 from geopy.distance import geodesic as GD
 import matplotlib.pyplot as plt
+import scipy.cluster.hierarchy as sch
 from sklearn.cluster import KMeans
 from tqdm import tqdm
 
@@ -25,9 +25,9 @@ dev_df = pd.read_csv("human_dev_standard.csv")
 df = pd.read_csv("cs_mean.csv")
 
 ## GENERAL ANALYSIS
-"""
-#region general_analysis
 
+#region general_analysis
+"""
 # Descriptive statistics
 print("Describe")
 print(df[["type","distance"]].groupby("type").describe())
@@ -61,6 +61,10 @@ plt.show()
 
 # Test distance by year
 means = df.groupby(['year', 'type'])['distance'].mean().reset_index(name="mean")
+sns.lineplot(data=means, x="year", y="mean", hue="type")
+plt.show()
+# Test distance by year
+means = df.groupby(['year', 'type'])['citations'].mean().reset_index(name="mean")
 sns.lineplot(data=means, x="year", y="mean", hue="type")
 plt.show()
 
@@ -111,8 +115,16 @@ mixed_df = df[(df['type'] == "mixed")]
 sns.lmplot(
     x="distance",
     y="citations",
-    hue="international",
     data=mixed_df,
+    scatter=False,
+)
+plt.show()
+
+sns.lmplot(
+    x="distance",
+    y="citations",
+    hue="type",
+    data=df,
     scatter=False,
 )
 plt.show()
@@ -121,16 +133,15 @@ top_df_m = df[(df['type'] == "mixed")].sort_values(by=['citations'], ascending=F
 top_df_c = df[(df['type'] == "company")].sort_values(by=['citations'], ascending=False).head(1000)
 top_df_e = df[(df['type'] == "education")].sort_values(by=['citations'], ascending=False).head(1000)
 cs_df = pd.concat([top_df_m, top_df_e, top_df_c])
-print(cs_df[["type","citations", "international", "distance"]].groupby(["type", "international"]).describe())
-
-#endregion
+print(cs_df[["type","citations", "international"]].groupby(["type", "international"]).describe())
 """
+#endregion
 
 ## CONTINENT ANALYSIS
-"""
-#region continent
 
-df = df[df["type"] == "company"]
+#region continent
+"""
+df = df[df["type"] == "education"]
 new_df = pd.DataFrame({"continent": [], "collaboration": [], "number": int})
 collabs = {"NA": [], "EU": [], "AS": [], "OC": [], "SA": [], "AF": []}
 for index, work in df.iterrows():
@@ -162,20 +173,20 @@ new_df.groupby(["continent", "collaboration"]).sum().unstack().plot.pie(
     layout=(-1, 3),
 )
 plt.show()
-
-#endregion
 """
+#endregion
+
 
 ## DEVELOPMENT ANALYSIS
-"""
-#region development
 
+#region development
+"""
 df = df[df["international"] == True]
 #df = df[df["no_dev"] == True]
 unique_majors = df["type"].unique()
 df["dist_trunc"] = round(df["distance"], 0)
 for major in unique_majors:
-   print(major + " "+  str(stats.pearsonr(df[df['type'] == major]['mean_index'], df[df['type'] == major]['distance'])))
+   print(major + " "+  str(stats.spearmanr(df[df['type'] == major]['mean_index'], df[df['type'] == major]['distance'])))
 print("------------")
 for major in unique_majors:
    print(major + " "+  str(stats.spearmanr(df[df['type'] == major]['mean_index'], df[df['type'] == major]['citations'])))
@@ -273,15 +284,33 @@ top_df_dev = df[(df['no_dev'] == False)].sort_values(by=['citations'], ascending
 cs_df = pd.concat([top_df_no_dev, top_df_dev])
 print(cs_df[["type","citations", "no_dev", "distance"]].groupby(["type", "no_dev"]).describe())
 
-#endregion
+no_dev_df = df[["citations", "no_dev", "distance", "international"]]
+print(no_dev_df[["no_dev","citations", "international"]].groupby(["no_dev", "international"]).describe())
+no_dev_df.groupby(["no_dev", "international"])['citations'].count().unstack().plot.pie(
+    subplots=True,
+    autopct="%1.1f%%",
+    legend=False,
+    startangle=90,
+    figsize=(10, 7),
+)
+plt.show()
+no_dev_df.groupby(["no_dev", "international"])['citations'].sum().unstack().plot.pie(
+    subplots=True,
+    autopct="%1.1f%%",
+    legend=False,
+    startangle=90,
+    figsize=(10, 7),
+)
+plt.show()
 """
+#endregion
 
 ## SCOPE ANALYSIS
-"""
+
 #region scope
 
 #Descriptive statistics
-
+"""
 def f(row):
     if row['ratio'] == 0.5:
         val = "half"
@@ -315,7 +344,7 @@ plt.show()
 df.groupby(['ratio_type'])['citations'].mean().plot(kind='bar')
 plt.show()
 
-df.groupby(["ratio_type"])['citations'].mean().plot.pie(
+df.groupby(["ratio_type"])['citations'].count().plot.pie(
     subplots=True,
     autopct="%1.1f%%",
     legend=False,
@@ -323,6 +352,65 @@ df.groupby(["ratio_type"])['citations'].mean().plot.pie(
     figsize=(10, 7),
 )
 plt.show()
-
-#endregion
+df.groupby(["ratio_type"])['citations'].sum().plot.pie(
+    subplots=True,
+    autopct="%1.1f%%",
+    legend=False,
+    startangle=90,
+    figsize=(10, 7),
+)
+plt.show()
 """
+#endregion
+
+
+## TOPIC ANALYSIS
+"""hm_df = pd.DataFrame(
+    {
+        "work": str,
+        "continent": [],
+        "concept": [],
+        "year":int,
+        "no_dev":bool,
+    }
+)
+continent_concept_list = []
+for row in tqdm(df.itertuples()):
+    locations = literal_eval(row.location)
+    continents = []
+    for continent in locations:
+        continents.append(continent["continent"])
+    for continent in set(continents):
+        continent = "NAA" if continent == "NA" else continent
+        concepts = literal_eval(row.concepts)
+        for concept in concepts:
+            continent_concept_list.append([row.work, continent, concept, row.year, row.no_dev, row.type])
+hm_df = pd.DataFrame(continent_concept_list, columns = ['work','continent', 'concept', 'year', 'no_dev', 'type'])
+hm_df.to_csv("test_concepts.csv")
+hm_df_full = pd.read_csv("test_concepts.csv")
+test = hm_df_full.groupby("concept")["work"].count().reset_index(name="count").sort_values(by=['count'], ascending=False).head(11)
+test.drop(test[test['concept'] == "Computer science"].index, inplace = True)
+new_df = hm_df_full.loc[hm_df_full['concept'].isin(test.concept.to_list())]
+means = new_df.groupby(['no_dev', 'concept', 'year', 'type'])["work"].count().reset_index(name="count")
+means = means[(means["no_dev"]==True)& (means["type"]=="mixed")]
+sns.lineplot(data=means, x="year", y="count", hue="concept")
+plt.show()
+test = hm_df_full.groupby("concept")["work"].count().reset_index(name="count").sort_values(by=['count'], ascending=False).head(11)
+test.drop(test[test['concept'] == "Computer science"].index, inplace = True)
+new_df = hm_df_full.loc[hm_df_full['concept'].isin(test.concept.to_list())]
+means = new_df.groupby(['no_dev', 'concept', 'year', 'type'])["work"].count().reset_index(name="count")
+means = means[(means["no_dev"]==False) & (means["type"]=="mixed")]
+sns.lineplot(data=means, x="year", y="count", hue="concept")
+plt.show()"""
+
+hm_df_full = pd.read_csv("test_concepts.csv")
+test = hm_df_full.groupby("concept")["work"].count().reset_index(name="count").sort_values(by=['count'], ascending=False).head(11)
+test.drop(test[test['concept'] == "Computer science"].index, inplace = True)
+new_df = hm_df_full.loc[hm_df_full['concept'].isin(test.concept.to_list())]
+means_full = new_df.groupby(['no_dev', 'concept', 'year'])["work"].count().reset_index(name="count")
+means = means_full[(means_full["no_dev"]==True)] #& (means["type"]=="mixed")
+sns.lineplot(data=means, x="year", y="count", hue="concept")
+plt.show()
+means = means_full[(means_full["no_dev"]==False)] #& (means["type"]=="mixed")
+sns.lineplot(data=means, x="year", y="count", hue="concept")
+plt.show()

@@ -8,27 +8,30 @@ from tqdm import tqdm
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
-# Merge csvs
-"""df_all = pd.read_csv("cs_all.csv")
+"""# Merge csvs
+df_all = pd.read_csv("cs_all.csv")
 df_all = df_all.drop_duplicates()
 df_all = df_all[df_all['distance'] > 0]
 df_all = df_all[df_all['year'] > 1989]
 df_all = df_all[df_all['year'] < 2022]
-df_all = df_all[df_all['citations'] > 0]
 df_15 = pd.read_csv("cs_15.csv")
 df_15 = df_15.drop_duplicates()
 df_15 = df_15[df_15['distance'] > 0]
 df_15 = df_15[df_15['year'] > 1989]
 df_15 = df_15[df_15['year'] < 2022]
-df_15 = df_15[df_15['citations'] > 0]
+df_0 = pd.read_csv("cs_0.csv")
+df_0 = df_0.drop_duplicates()
+df_0 = df_0[df_0['distance'] > 0]
+df_0 = df_0[df_0['year'] > 1989]
+df_0 = df_0[df_0['year'] < 2022]
 
-cs_df = pd.concat([df_all, df_15])
+cs_df = pd.concat([df_all, df_15,df_0])
 cs_df.reset_index(drop=True)
 cs_df.drop_duplicates()
 
-cs_df.to_csv("cs.csv")"""
+cs_df.to_csv("cs.csv")
 
-"""# Setup Data with continent and scope
+# Setup Data with continent and scope
 df = pd.read_csv("cs.csv")
 dev_df = pd.read_csv("human_dev_standard.csv")
 df['no_dev'] = False
@@ -75,11 +78,11 @@ for row in tqdm(df.itertuples()):
     df._set_value(row.Index,'ratio', company/(education+company))
     df._set_value(row.Index,'location',new_loc)
 df.reset_index(drop=True)
-df.to_csv("cs_data.csv")"""
+df.to_csv("cs_data.csv")
 
-"""df = pd.read_csv("cs_data.csv")
+df = pd.read_csv("cs_data.csv")
 df = df.drop_duplicates("work")
-df.to_csv("cs.csv")"""
+df.to_csv("cs.csv")
 
 df = pd.read_csv("cs.csv")
 
@@ -98,4 +101,8 @@ for row in tqdm(df.itertuples()):
     df._set_value(row.Index,'mean_distance',statistics.mean(distances_total))
 
 df = df[df['mean_index'].notna()]
+df.to_csv("cs_mean.csv")"""
+
+df = pd.read_csv("cs_mean.csv")
+df['citations'] = df['citations'].fillna(0)
 df.to_csv("cs_mean.csv")
