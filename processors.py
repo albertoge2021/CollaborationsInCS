@@ -5,6 +5,7 @@ import warnings
 import statistics
 from geopy.distance import geodesic as GD
 from tqdm import tqdm
+from geopy import distance
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
@@ -83,25 +84,27 @@ df.to_csv("cs_data.csv")
 df = pd.read_csv("cs_data.csv")
 df = df.drop_duplicates("work")
 df.to_csv("cs.csv")
-
+"""
 df = pd.read_csv("cs.csv")
 
 for row in tqdm(df.itertuples()):
     locations = literal_eval(row.location)
     distances = []
-    distances_total = []
-    first_country = (locations[0]["lat"], locations[0]["lng"])
-    for country in locations[1:]:
+    for country in locations:
         country_coord = (country["lat"], country["lng"])
-        if country_coord == first_country or country_coord in distances:
-            continue
         distances.append(country_coord)
-    for coord in distances:
-        distances_total.append(GD(first_country, coord).km)
-    df._set_value(row.Index,'mean_distance',statistics.mean(distances_total))
+    total_distance = 0
+    count = 0
+    for i in range(len(distances)):
+        for j in range(i+1, len(distances)):
+            dist = GD(distances[i], distances[j]).km
+            total_distance += dist
+            count += 1
+    mean_distance = total_distance / count
+    df._set_value(row.Index,'mean_distance',mean_distance)
 
 df = df[df['mean_index'].notna()]
-df.to_csv("cs_mean.csv")"""
+df.to_csv("cs_mean.csv")
 
 df = pd.read_csv("cs_mean.csv")
 df['citations'] = df['citations'].fillna(0)

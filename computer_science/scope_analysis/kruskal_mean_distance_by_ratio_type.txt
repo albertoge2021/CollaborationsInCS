@@ -1,0 +1,1 @@
+Kruskal Test for Mean distance by ratio typeKruskalResult(statistic=2580.4246366552647, pvalue=0.0)

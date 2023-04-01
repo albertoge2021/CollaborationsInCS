@@ -1,0 +1,1 @@
+Kruskal Test for Max distance by ratio typeKruskalResult(statistic=732.37907136573, pvalue=9.244966083329964e-160)

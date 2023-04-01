@@ -1,0 +1,1 @@
+Kruskal Test for citations by development for education KruskalResult(statistic=990.1768097680832, pvalue=2.4517935014699474e-217)Kruskal Test for citations by development for mixed KruskalResult(statistic=17.142014390340847, pvalue=3.468646342197316e-05)Kruskal Test for citations by development for company KruskalResult(statistic=0.663177456745855, pvalue=0.41544041776644647)

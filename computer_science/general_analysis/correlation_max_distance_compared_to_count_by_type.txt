@@ -1,0 +1,6 @@
+Pearson test for education - PearsonRResult(statistic=-0.29769359354043623, pvalue=0.0)
+Spearman test for education - PearsonRResult(statistic=-0.29769359354043623, pvalue=0.0)
+Pearson test for mixed - PearsonRResult(statistic=-0.2314868248264368, pvalue=1.8781129514426887e-187)
+Spearman test for mixed - PearsonRResult(statistic=-0.2314868248264368, pvalue=1.8781129514426887e-187)
+Pearson test for company - PearsonRResult(statistic=-0.07321085122531537, pvalue=7.600177830931443e-08)
+Spearman test for company - PearsonRResult(statistic=-0.07321085122531537, pvalue=7.600177830931443e-08)
