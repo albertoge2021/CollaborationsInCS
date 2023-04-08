@@ -85,7 +85,7 @@ df = pd.read_csv("cs_data.csv")
 df = df.drop_duplicates("work")
 df.to_csv("cs.csv")
 """
-df = pd.read_csv("cs.csv")
+"""df = pd.read_csv("cs.csv")
 
 for row in tqdm(df.itertuples()):
     locations = literal_eval(row.location)
@@ -108,4 +108,18 @@ df.to_csv("cs_mean.csv")
 
 df = pd.read_csv("cs_mean.csv")
 df['citations'] = df['citations'].fillna(0)
-df.to_csv("cs_mean.csv")
+df.to_csv("cs_mean.csv")"""
+
+eu_countries = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE']
+df = pd.read_csv("cs_mean.csv")
+for row in tqdm(df.itertuples()):
+    locations = literal_eval(row.location)
+    new_loc = []
+    location_list = []
+    for location in locations:
+        location = dict(location)
+        if location["country"] in eu_countries:
+            location["country"] = "EU"
+        new_loc.append(location)
+    df._set_value(row.Index,'location',new_loc)
+df.to_csv("cs_eu.csv")

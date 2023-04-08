@@ -1,0 +1,5 @@
+company
+CN - US collaboration 406
+CN - EU collaboration 173
+EU - US collaboration 2385
+EU - US - CN collaboration 11

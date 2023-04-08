@@ -1,0 +1,7 @@
+education
+CN - US collaboration represents 13.64% of total US collaborations
+CN - US collaboration represents 18.66% of total Chinese collaborations
+CN - EU collaboration represents 6.99% of total CN collaborations
+CN - EU collaboration represents 5.69% of total EU collaborations
+EU - US collaboration represents 14.95% of total US collaborations
+EU - US collaboration represents 16.64% of total EU collaborations
