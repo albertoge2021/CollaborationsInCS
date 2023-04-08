@@ -10,20 +10,23 @@ from pathlib import Path
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
-"""countries = ["EU", "US", "CN"]
+us_collaborations = 0
+eu_collaborations = 0
+cn_collaborations = 0
+us_eu_collaborations = 0
+us_cn_collaborations = 0
+eu_cn_collaborations = 0
+eu_cn_us_collaborations = 0
+us_citations = 0
+eu_citations = 0
+cn_citations = 0
+us_eu_citations = 0
+us_cn_citations = 0
+eu_cn_citations = 0
+eu_cn_us_citations = 0
+
 df = pd.read_csv("cs_eu.csv")
-new_df = pd.DataFrame({"country": [], "collaboration": [], "number": int})
-collabs = {country: [] for country in countries}
-continent_concept_list = []
-hm_df = pd.DataFrame(
-    {
-        "work": str,
-        "country": [],
-        "concept": [],
-        "year":int,
-        "no_dev":bool,
-    }
-)
+countries = ["EU", "US", "CN"]
 for row in tqdm(df.itertuples()):
     locations = literal_eval(row.location)
     country_list= []
@@ -31,52 +34,72 @@ for row in tqdm(df.itertuples()):
         country_code = location["country"]
         if country_code in countries:
             country_list.append(country_code)
-    concepts = literal_eval(row.concepts)
-    for concept in concepts:
-        for country in country_list:
-            continent_concept_list.append([row.work, country, concept, row.year, row.no_dev, row.type])
-hm_df = pd.DataFrame(continent_concept_list, columns = ['work','country', 'concept', 'year', 'no_dev', 'type'])
-hm_df.to_csv("test_concepts_eu_us_cn.csv")
+    citations = row.citations
+    if "US" in set(country_list):
+        us_collaborations += 1
+        us_citations += citations
+        if "CN" in country_list and "EU" in country_list:
+            eu_cn_us_collaborations += 1
+            eu_cn_us_citations += citations
+        if "CN" in country_list:
+            us_cn_collaborations += 1
+            us_cn_citations += citations
+        if "EU" in country_list:
+            us_eu_collaborations += 1
+            us_eu_citations += citations
+    if "CN" in country_list:
+        cn_collaborations += 1
+        cn_citations += citations
+        if "EU" in country_list:
+            eu_cn_collaborations += 1
+            eu_cn_citations += citations
+    if "EU" in country_list:
+        eu_collaborations += 1
+        eu_citations += citations
 
+us_mean_citations = us_citations / us_collaborations if us_collaborations > 0 else 0
+eu_mean_citations = eu_citations / eu_collaborations if eu_collaborations > 0 else 0
+cn_mean_citations = cn_citations / cn_collaborations if cn_collaborations > 0 else 0
+us_eu_mean_citations = us_eu_citations / us_eu_collaborations if us_eu_collaborations > 0 else 0
+us_cn_mean_citations = us_cn_citations / us_cn_collaborations if us_cn_collaborations > 0 else 0
+eu_cn_mean_citations = eu_cn_citations / eu_cn_collaborations if eu_cn_collaborations > 0 else 0
+eu_cn_us_mean_citations = eu_cn_us_citations / eu_cn_us_collaborations if eu_cn_us_collaborations > 0 else 0
 
-unique_continents = ["CN", "US", "EU"]
-for unique_continent in unique_continents:
-    hm_df_full = pd.read_csv("test_concepts_eu_us_cn.csv")
-    test = (
-        hm_df_full.groupby("concept")["work"]
-        .count()
-        .reset_index(name="count")
-        .sort_values(by=["count"], ascending=False)
-        .head(11)
-    )
-    test.drop(test[test["concept"] == "Computer science"].index, inplace=True)
-    new_df = hm_df_full.loc[hm_df_full["concept"].isin(test.concept.to_list())]
-    means_full = (
-        new_df.groupby(["continent", "concept", "year"])["work"]
-        .count()
-        .reset_index(name="count")
-    )
-    means = means_full[
-        (means_full["continent"] == unique_continent)
-    ]  # & (means["type"]=="mixed")
-    sns.lineplot(data=means, x="year", y="count", hue="concept")
-    plt.savefig(
-        f"computer_science/topic_analysis/line_topics_by_year_by_country_{unique_continent}.png"
-    )
-    plt.close()"""
+with open("computer_science/country_analysis/country_collaboration_cn_us_eu_citation_mean_total.txt", "w") as f:
+    f.write(f"US mean citations: {us_mean_citations}\n")
+    f.write(f"EU mean citations: {eu_mean_citations}\n")
+    f.write(f"CN mean citations: {cn_mean_citations}\n")
+    f.write(f"US-EU mean citations: {us_eu_mean_citations}\n")
+    f.write(f"US-CN mean citations: {us_cn_mean_citations}\n")
+    f.write(f"EU-CN mean citations: {eu_cn_mean_citations}\n")
+    f.write(f"EU-CN-US mean citations: {eu_cn_us_mean_citations}\n")
 
-unique_continents = ["CN", "US", "EU"]
-for i, continent1 in enumerate(unique_continents):
-    for continent2 in unique_continents[i+1:]:
-        hm_df_full = pd.read_csv("test_concepts_eu_us_cn.csv")
-        test = hm_df_full.groupby("concept")["work"].count().reset_index(name="count").sort_values(by=["count"], ascending=False).head(11)
-        test.drop(test[test["concept"] == "Computer science"].index, inplace=True)
-        new_df = hm_df_full.loc[hm_df_full["concept"].isin(test.concept.to_list())]
-        means_full = new_df.groupby(["year", "concept"]).apply(lambda x: x[x['continent'].isin([continent1, continent2])]['work'].count()).reset_index(name='count')
-        means_full.rename(columns={'level_2': 'collaboration'}, inplace=True)
-        means_full['collaboration'] = f"{continent1}-{continent2}"
-        sns.lineplot(data=means_full, x="year", y="count", hue="concept")
-        plt.title(f"Topics per year by concept for {continent1}-{continent2} collaborations")
-        plt.savefig(f"computer_science/topic_analysis/line_topics_by_year_{continent1}_{continent2}.png")
-        plt.close()
+# Define the data
+us_data_means = [us_mean_citations, us_eu_mean_citations, us_cn_mean_citations]
+eu_data_means = [us_eu_mean_citations, eu_mean_citations, eu_cn_mean_citations]
+cn_data_means = [eu_cn_mean_citations, us_cn_mean_citations, cn_mean_citations]
 
+# Define the x-axis labels
+labels = ['US Collaborations', 'EU Collaborations', 'CN Collaborations']
+
+# Define the x-axis locations for each group of bars
+x_us = [0, 4, 8]
+x_eu = [1, 5, 9]
+x_cn = [2, 6, 10]
+
+# Plot the bars
+plt.bar(x_us, us_data_means, color='blue', width=0.8, label='US')
+plt.bar(x_eu, eu_data_means, color='red', width=0.8, label='EU')
+plt.bar(x_cn, cn_data_means, color='green', width=0.8, label='CN')
+
+# Add the x-axis labels and tick marks
+plt.xticks([1.5, 5.5, 9.5], labels)
+plt.xlabel('Collaboration Type')
+plt.ylabel('Number of Collaborations')
+
+# Add a legend
+plt.legend()
+
+# Show the plot
+plt.savefig(f'computer_science/country_analysis/bar_country_collaboration_citations_cn_us_eu_total.png')
+plt.close()
