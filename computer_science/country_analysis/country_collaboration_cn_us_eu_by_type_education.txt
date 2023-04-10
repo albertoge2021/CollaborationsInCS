@@ -1,5 +1,0 @@
-education
-CN - US collaboration 81964
-CN - EU collaboration 30696
-EU - US collaboration 89799
-EU - US - CN collaboration 2678

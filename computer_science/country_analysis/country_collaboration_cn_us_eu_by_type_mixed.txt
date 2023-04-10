@@ -1,5 +1,0 @@
-mixed
-CN - US collaboration 12481
-CN - EU collaboration 3953
-EU - US collaboration 22926
-EU - US - CN collaboration 747

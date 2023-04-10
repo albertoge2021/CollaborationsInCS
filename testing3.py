@@ -6,100 +6,190 @@ import scipy.stats as stats
 import seaborn as sns
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import ast
 from pathlib import Path
+from collections import defaultdict
+
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
-us_collaborations = 0
-eu_collaborations = 0
-cn_collaborations = 0
-us_eu_collaborations = 0
-us_cn_collaborations = 0
-eu_cn_collaborations = 0
-eu_cn_us_collaborations = 0
+
+eu_df = pd.read_csv("cs_eu.csv")
+selected_countries=["US","CN","EU"]
+unique_collaboration_types = eu_df["type"].unique()
+
+us_ratio_total = []
+eu_ratio_total = []
+cn_ratio_total = []
+us_eu_counts = 0
+us_cn_counts = 0
+eu_cn_counts = 0
 us_citations = 0
 eu_citations = 0
 cn_citations = 0
-us_eu_citations = 0
-us_cn_citations = 0
-eu_cn_citations = 0
-eu_cn_us_citations = 0
 
-df = pd.read_csv("cs_eu.csv")
-countries = ["EU", "US", "CN"]
-for row in tqdm(df.itertuples()):
+for row in tqdm(eu_df.itertuples()):
+    us_counts = 0
+    eu_counts = 0
+    cn_counts = 0
     locations = literal_eval(row.location)
     country_list= []
     for location in locations:
-        country_code = location["country"]
-        if country_code in countries:
-            country_list.append(country_code)
-    citations = row.citations
-    if "US" in set(country_list):
-        us_collaborations += 1
-        us_citations += citations
-        if "CN" in country_list and "EU" in country_list:
-            eu_cn_us_collaborations += 1
-            eu_cn_us_citations += citations
+        country_list.append(location["country"])
+    if any(country in selected_countries for country in country_list):
+        num_countries = len(country_list)
+        citations = row.citations
+        if "US" in country_list:
+            us_counts += country_list.count("US")
+            us_citations += citations
         if "CN" in country_list:
-            us_cn_collaborations += 1
-            us_cn_citations += citations
+            cn_counts += country_list.count("CN")
+            cn_citations += citations
         if "EU" in country_list:
-            us_eu_collaborations += 1
-            us_eu_citations += citations
-    if "CN" in country_list:
-        cn_collaborations += 1
-        cn_citations += citations
-        if "EU" in country_list:
-            eu_cn_collaborations += 1
-            eu_cn_citations += citations
-    if "EU" in country_list:
-        eu_collaborations += 1
-        eu_citations += citations
+            eu_counts += country_list.count("EU")
+            eu_citations += citations
+        if us_counts > 0:
+            us_ratio_total.append(((us_counts/num_countries), citations, row.type))
+        if eu_counts > 0:
+            eu_ratio_total.append(((eu_counts/num_countries), citations, row.type))
+        if cn_counts > 0:
+            cn_ratio_total.append(((cn_counts/num_countries), citations, row.type))
 
-us_mean_citations = us_citations / us_collaborations if us_collaborations > 0 else 0
-eu_mean_citations = eu_citations / eu_collaborations if eu_collaborations > 0 else 0
-cn_mean_citations = cn_citations / cn_collaborations if cn_collaborations > 0 else 0
-us_eu_mean_citations = us_eu_citations / us_eu_collaborations if us_eu_collaborations > 0 else 0
-us_cn_mean_citations = us_cn_citations / us_cn_collaborations if us_cn_collaborations > 0 else 0
-eu_cn_mean_citations = eu_cn_citations / eu_cn_collaborations if eu_cn_collaborations > 0 else 0
-eu_cn_us_mean_citations = eu_cn_us_citations / eu_cn_us_collaborations if eu_cn_us_collaborations > 0 else 0
+df = pd.DataFrame(us_ratio_total, columns=['ratio', 'citations', 'type'])
 
-with open("computer_science/country_analysis/country_collaboration_cn_us_eu_citation_mean_total.txt", "w") as f:
-    f.write(f"US mean citations: {us_mean_citations}\n")
-    f.write(f"EU mean citations: {eu_mean_citations}\n")
-    f.write(f"CN mean citations: {cn_mean_citations}\n")
-    f.write(f"US-EU mean citations: {us_eu_mean_citations}\n")
-    f.write(f"US-CN mean citations: {us_cn_mean_citations}\n")
-    f.write(f"EU-CN mean citations: {eu_cn_mean_citations}\n")
-    f.write(f"EU-CN-US mean citations: {eu_cn_us_mean_citations}\n")
+with open('computer_science/country_analysis/correlation_ratio_compared_to_citations_by_type_us.txt', 'w') as f:
+    for collaboration_type in unique_collaboration_types:
+        f.write("Pearson test for "+collaboration_type +" - " + str(stats.pearsonr(df[df['type'] == collaboration_type]['ratio'], df[df['type'] == collaboration_type]['citations'])))
+        f.write('\n')
+        f.write("Spearman test for "+collaboration_type +" - " + str(stats.pearsonr(df[df['type'] == collaboration_type]['ratio'], df[df['type'] == collaboration_type]['citations'])))
+        f.write('\n')
+    f.write("Pearson test general - " + str(stats.pearsonr(df['ratio'], df['citations'])))
+    f.write('\n')
+    f.write("Spearman test general - " + str(stats.pearsonr(df['ratio'], df['citations'])))
+    f.write('\n')
 
-# Define the data
-us_data_means = [us_mean_citations, us_eu_mean_citations, us_cn_mean_citations]
-eu_data_means = [us_eu_mean_citations, eu_mean_citations, eu_cn_mean_citations]
-cn_data_means = [eu_cn_mean_citations, us_cn_mean_citations, cn_mean_citations]
-
-# Define the x-axis labels
-labels = ['US Collaborations', 'EU Collaborations', 'CN Collaborations']
-
-# Define the x-axis locations for each group of bars
-x_us = [0, 4, 8]
-x_eu = [1, 5, 9]
-x_cn = [2, 6, 10]
-
-# Plot the bars
-plt.bar(x_us, us_data_means, color='blue', width=0.8, label='US')
-plt.bar(x_eu, eu_data_means, color='red', width=0.8, label='EU')
-plt.bar(x_cn, cn_data_means, color='green', width=0.8, label='CN')
-
-# Add the x-axis labels and tick marks
-plt.xticks([1.5, 5.5, 9.5], labels)
-plt.xlabel('Collaboration Type')
-plt.ylabel('Number of Collaborations')
-
-# Add a legend
-plt.legend()
-
-# Show the plot
-plt.savefig(f'computer_science/country_analysis/bar_country_collaboration_citations_cn_us_eu_total.png')
+sns.lmplot(
+    x="ratio",
+    y="citations",
+    hue="type",
+    data=df,
+    scatter=False,
+)
+plt.xlabel('Participation ratio') 
+plt.ylabel('Number of Citations') 
+plt.title('US participation ratio vs citations')
+plt.savefig(f'computer_science/country_analysis/scatter_ratio_citations_by_type_us.png')
 plt.close()
+
+sns.lmplot(
+    x="ratio",
+    y="citations",
+    data=df,
+    scatter=False,
+)
+plt.xlabel('Participation ratio') 
+plt.ylabel('Number of Citations') 
+plt.title('US participation ratio vs citations')
+plt.savefig(f'computer_science/country_analysis/scatter_ratio_citations_us.png')
+plt.close()
+
+means = df.groupby(['ratio',"type"])['citations'].mean().reset_index(name="mean")
+sns.lineplot(data=means, x="ratio", y="mean", hue="type")
+plt.xlabel('Participation ratio')
+plt.ylabel('Mean citations')
+plt.title('US participation ratio vs mean citations')
+plt.savefig(f'computer_science/country_analysis/scatter_mean_citations_by_ratio_by_type_us.png')
+plt.close()
+
+df = pd.DataFrame(eu_ratio_total, columns=['ratio', 'citations', 'type'])
+
+with open('computer_science/country_analysis/correlation_ratio_compared_to_citations_by_type_eu.txt', 'w') as f:
+    for collaboration_type in unique_collaboration_types:
+        f.write("Pearson test for "+collaboration_type +" - " + str(stats.pearsonr(df[df['type'] == collaboration_type]['ratio'], df[df['type'] == collaboration_type]['citations'])))
+        f.write('\n')
+        f.write("Spearman test for "+collaboration_type +" - " + str(stats.pearsonr(df[df['type'] == collaboration_type]['ratio'], df[df['type'] == collaboration_type]['citations'])))
+        f.write('\n')
+    f.write("Pearson test general - " + str(stats.pearsonr(df['ratio'], df['citations'])))
+    f.write('\n')
+    f.write("Spearman test general - " + str(stats.pearsonr(df['ratio'], df['citations'])))
+    f.write('\n')
+
+sns.lmplot(
+    x="ratio",
+    y="citations",
+    hue="type",
+    data=df,
+    scatter=False,
+)
+plt.xlabel('Participation ratio') 
+plt.ylabel('Number of Citations') 
+plt.title('EU participation ratio vs citations')
+plt.savefig(f'computer_science/country_analysis/scatter_ratio_citations_by_type_eu.png')
+plt.close()
+
+sns.lmplot(
+    x="ratio",
+    y="citations",
+    data=df,
+    scatter=False,
+)
+plt.xlabel('Participation ratio') 
+plt.ylabel('Number of Citations') 
+plt.title('EU participation ratio vs citations')
+plt.savefig(f'computer_science/country_analysis/scatter_ratio_citations_eu.png')
+plt.close()
+
+means = df.groupby(['ratio', "type"])['citations'].mean().reset_index(name="mean")
+sns.lineplot(data=means, x="ratio", y="mean", hue="type")
+plt.xlabel('Participation ratio')
+plt.ylabel('Mean citations')
+plt.title('EU participation ratio vs mean citations')
+plt.savefig(f'computer_science/country_analysis/scatter_mean_citations_by_ratio_by_type_eu.png')
+plt.close()
+
+df = pd.DataFrame(cn_ratio_total, columns=['ratio', 'citations', 'type'])
+
+with open('computer_science/country_analysis/correlation_ratio_compared_to_citations_by_type_cn.txt', 'w') as f:
+    for collaboration_type in unique_collaboration_types:
+        f.write("Pearson test for "+collaboration_type +" - " + str(stats.pearsonr(df[df['type'] == collaboration_type]['ratio'], df[df['type'] == collaboration_type]['citations'])))
+        f.write('\n')
+        f.write("Spearman test for "+collaboration_type +" - " + str(stats.pearsonr(df[df['type'] == collaboration_type]['ratio'], df[df['type'] == collaboration_type]['citations'])))
+        f.write('\n')
+    f.write("Pearson test general - " + str(stats.pearsonr(df['ratio'], df['citations'])))
+    f.write('\n')
+    f.write("Spearman test general - " + str(stats.pearsonr(df['ratio'], df['citations'])))
+    f.write('\n')
+
+sns.lmplot(
+    x="ratio",
+    y="citations",
+    hue="type",
+    data=df,
+    scatter=False,
+)
+plt.xlabel('Participation ratio') 
+plt.ylabel('Number of Citations') 
+plt.title('CN participation ratio vs citations')
+plt.savefig(f'computer_science/country_analysis/scatter_ratio_citations_by_type_cn.png')
+plt.close()
+
+sns.lmplot(
+    x="ratio",
+    y="citations",
+    data=df,
+    scatter=False,
+)
+plt.xlabel('Participation ratio') 
+plt.ylabel('Number of Citations') 
+plt.title('CN participation ratio vs citations')
+plt.savefig(f'computer_science/country_analysis/scatter_ratio_citations_cn.png')
+plt.close()
+
+means = df.groupby(['ratio',"type"])['citations'].mean().reset_index(name="mean")
+sns.lineplot(data=means, x="ratio", y="mean", hue="type")
+plt.xlabel('Participation ratio')
+plt.ylabel('Mean citations')
+plt.title('CN participation ratio vs mean citations')
+plt.savefig(f'computer_science/country_analysis/scatter_mean_citations_by_ratio_by_type_cn.png')
+plt.close()
+    
