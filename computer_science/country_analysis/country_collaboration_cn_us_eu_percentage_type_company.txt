@@ -7,3 +7,6 @@ CN - EU collaboration represents 14.03% of total CN collaborations
 CN - EU collaboration represents 2.50% of total EU collaborations
 EU - US collaboration represents 21.93% of total US collaborations
 EU - US collaboration represents 36.64% of total EU collaborations
+EU - US - CN collaboration represents 0.10% of total US collaborations
+EU - US - CN collaboration represents 0.17% of total EU collaborations
+EU - US - CN collaboration represents 0.95% of total CN collaborations
