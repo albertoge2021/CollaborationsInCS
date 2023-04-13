@@ -1,6 +1,6 @@
-US - US only collaboration 431608
-CN - CN only collaboration 329314
-EU - EU only collaboration 421888
+US - US only collaboration 263154
+CN - CN only collaboration 208721
+EU - EU only collaboration 221469
 CN - US collaboration 79286
 CN - EU collaboration 28018
 EU - US collaboration 87121

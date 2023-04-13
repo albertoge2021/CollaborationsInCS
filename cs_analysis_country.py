@@ -16,10 +16,8 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 # https://towardsdatascience.com/what-are-the-commonly-used-statistical-tests-in-data-science-a95cfc2e6b5e
 
 # Setup Data
-dev_df = pd.read_csv("human_dev_standard.csv")
-df = pd.read_csv("cs_mean.csv")
 eu_df = pd.read_csv("cs_eu.csv")
-unique_collaboration_types = df["type"].unique()
+unique_collaboration_types = eu_df["type"].unique()
 selected_countries = ["US", "CN", "EU"]
 colors = ["blue", "green", "red", "brown"]
 
@@ -44,44 +42,47 @@ eu_cn_us_citations = 0
 for row in tqdm(eu_df.itertuples()):
     locations = literal_eval(row.location)
     country_list = []
+    check = False
     for location in locations:
         country_code = location["country"]
+        country_list.append(country_code)
         if country_code in selected_countries:
-            country_list.append(country_code)
-    citations = row.citations
+            check = True
     country_list = set(country_list)
-    if "US" in country_list:
-        us_collaborations_total += 1
-        if "US" in country_list and "CN" not in country_list and "EU" not in country_list:
-            us_collaborations += 1
-            us_citations += citations
+    if check:
+        citations = row.citations
+        if "US" in country_list:
+            us_collaborations_total += 1
+            if "US" in country_list and "CN" not in country_list and "EU" not in country_list and len(country_list) == 1:
+                us_collaborations += 1
+                us_citations += citations
+                continue
+        if "CN" in country_list:
+            cn_collaborations_total += 1
+            if "CN" in country_list and "US" not in country_list and "EU" not in country_list and len(country_list) == 1:
+                cn_collaborations += 1
+                cn_citations += citations
+                continue
+        if "EU" in country_list:
+            eu_collaborations_total += 1
+            if "EU" in country_list and "US" not in country_list and "CN" not in country_list and len(country_list) == 1:
+                eu_collaborations += 1
+                eu_citations += citations
+                continue
+        if "EU" in country_list and "CN" in country_list and "US" in country_list:
+            eu_cn_us_collaborations += 1
+            eu_cn_us_citations += citations
             continue
-    if "CN" in country_list:
-        cn_collaborations_total += 1
-        if "CN" in country_list and "US" not in country_list and "EU" not in country_list:
-            cn_collaborations += 1
-            cn_citations += citations
-            continue
-    if "EU" in country_list:
-        eu_collaborations_total += 1
-        if "EU" in country_list and "US" not in country_list and "CN" not in country_list:
-            eu_collaborations += 1
-            eu_citations += citations
-            continue
-    if "EU" in country_list and "CN" in country_list and "US" in country_list:
-        eu_cn_us_collaborations += 1
-        eu_cn_us_citations += citations
-        continue
-    else:
-        if "US" in country_list and "CN" in country_list:
-            us_cn_collaborations += 1
-            us_cn_citations += citations
-        elif "US" in country_list and "EU" in country_list:
-            us_eu_collaborations += 1
-            us_eu_citations += citations
-        elif "EU" in country_list and "CN" in country_list:
-            eu_cn_collaborations += 1
-            eu_cn_citations += citations
+        else:
+            if "US" in country_list and "CN" in country_list:
+                us_cn_collaborations += 1
+                us_cn_citations += citations
+            elif "US" in country_list and "EU" in country_list:
+                us_eu_collaborations += 1
+                us_eu_citations += citations
+            elif "EU" in country_list and "CN" in country_list:
+                eu_cn_collaborations += 1
+                eu_cn_citations += citations
 
 # Define the data
 us_data = [us_collaborations, us_eu_collaborations, us_cn_collaborations]
@@ -90,7 +91,7 @@ cn_data = [us_cn_collaborations, eu_cn_collaborations, cn_collaborations]
 all_data = [eu_cn_us_collaborations, eu_cn_us_collaborations, eu_cn_us_collaborations]
 
 # Define the x-axis labels
-labels = ["US Collaborations", "EU Collaborations", "CN Collaborations"]
+labels = ["USA", "EU28", "China"]
 
 # Define the x-axis locations for each group of bars
 x_us = [0, 1, 2]
@@ -140,7 +141,7 @@ all_data = [
 ]
 
 # Define the x-axis labels
-labels = ["US Collaborations", "EU Collaborations", "CN Collaborations"]
+labels = ["USA", "EU28", "China"]
 
 # Define the x-axis locations for each group of bars
 x_us = [0, 1, 2]
@@ -256,7 +257,7 @@ cn_data_means = [us_cn_mean_citations, eu_cn_mean_citations, cn_mean_citations]
 all_data_means = [eu_cn_us_mean_citations, eu_cn_us_mean_citations, eu_cn_us_mean_citations]
 
 # Define the x-axis labels
-labels = ["US Collaborations", "EU Collaborations", "CN Collaborations"]
+labels = ["USA", "EU28", "China"]
 
 # Define the x-axis locations for each group of bars
 # Define the x-axis locations for each group of bars
@@ -274,7 +275,7 @@ plt.bar(x_all, all_data_means, color="brown", width=0.8, label="EU-CN-US")
 # Add the x-axis labels and tick marks
 plt.xticks([1.5, 5.5, 9.5], labels)
 plt.xlabel("Collaboration Type")
-plt.ylabel("Number of Collaborations")
+plt.ylabel("Mean Citations")
 
 # Add a legend
 legend_colors = [patches.Patch(color=color) for color in colors]
@@ -311,40 +312,42 @@ for collaboration_type in unique_collaboration_types:
         country_list = []
         for location in locations:
             country_code = location["country"]
+            country_list.append(country_code)
             if country_code in selected_countries:
-                country_list.append(country_code)
-        citations = row.citations
+                check = True
         country_list = set(country_list)
-        if "US" in country_list:
-            us_collaborations_total += 1
-            if "US" in country_list and "CN" not in country_list and "EU" not in country_list:
-                us_collaborations += 1
-                us_citations += citations
-                continue
-        if "CN" in country_list:
-            cn_collaborations_total += 1
-            if "CN" in country_list and "US" not in country_list and "EU" not in country_list:
-                cn_collaborations += 1
-                cn_citations += citations
-                continue
-        if "EU" in country_list:
-            eu_collaborations_total += 1
-            if "EU" in country_list and "US" not in country_list and "CN" not in country_list:
-                eu_collaborations += 1
-                eu_citations += citations
-                continue
-        if "EU" in country_list and "CN" in country_list and "US" in country_list:
-            eu_cn_us_collaborations += 1
-            eu_cn_us_citations += citations
-        elif "US" in country_list and "CN" in country_list:
-            us_cn_collaborations += 1
-            us_cn_citations += citations
-        elif "US" in country_list and "EU" in country_list:
-            us_eu_collaborations += 1
-            us_eu_citations += citations
-        elif "EU" in country_list and "CN" in country_list:
-            eu_cn_collaborations += 1
-            eu_cn_citations += citations
+        if check:
+            citations = row.citations
+            if "US" in country_list:
+                us_collaborations_total += 1
+                if "US" in country_list and "CN" not in country_list and "EU" not in country_list and len(country_list) == 1:
+                    us_collaborations += 1
+                    us_citations += citations
+                    continue
+            if "CN" in country_list:
+                cn_collaborations_total += 1
+                if "CN" in country_list and "US" not in country_list and "EU" not in country_list and len(country_list) == 1:
+                    cn_collaborations += 1
+                    cn_citations += citations
+                    continue
+            if "EU" in country_list:
+                eu_collaborations_total += 1
+                if "EU" in country_list and "US" not in country_list and "CN" not in country_list and len(country_list) == 1:
+                    eu_collaborations += 1
+                    eu_citations += citations
+                    continue
+            if "EU" in country_list and "CN" in country_list and "US" in country_list:
+                eu_cn_us_collaborations += 1
+                eu_cn_us_citations += citations
+            elif "US" in country_list and "CN" in country_list:
+                us_cn_collaborations += 1
+                us_cn_citations += citations
+            elif "US" in country_list and "EU" in country_list:
+                us_eu_collaborations += 1
+                us_eu_citations += citations
+            elif "EU" in country_list and "CN" in country_list:
+                eu_cn_collaborations += 1
+                eu_cn_citations += citations
 
     with open(
         f"computer_science/country_analysis/country_collaboration_cn_us_eu_percentage_type_{collaboration_type}.txt",
@@ -406,7 +409,7 @@ for collaboration_type in unique_collaboration_types:
     all_data = [eu_cn_us_collaborations, eu_cn_us_collaborations, eu_cn_us_collaborations]
 
     # Define the x-axis labels
-    labels = ["US Collaborations", "EU Collaborations", "CN Collaborations"]
+    labels = ["USA", "EU28", "China"]
 
     # Define the x-axis locations for each group of bars
     x_us = [0, 1, 2]
@@ -458,7 +461,7 @@ for collaboration_type in unique_collaboration_types:
     ]
 
     # Define the x-axis labels
-    labels = ["US Collaborations", "EU Collaborations", "CN Collaborations"]
+    labels = ["USA", "EU28", "China"]
 
     # Define the x-axis locations for each group of bars
     x_us = [0, 1, 2]
@@ -524,7 +527,7 @@ for collaboration_type in unique_collaboration_types:
     all_data_means = [eu_cn_us_mean_citations, eu_cn_us_mean_citations, eu_cn_us_mean_citations]
 
     # Define the x-axis labels
-    labels = ["US Collaborations", "EU Collaborations", "CN Collaborations"]
+    labels = ["USA", "EU28", "China"]
 
     # Define the x-axis locations for each group of bars
     # Define the x-axis locations for each group of bars
@@ -541,8 +544,8 @@ for collaboration_type in unique_collaboration_types:
 
     # Add the x-axis labels and tick marks
     plt.xticks([1.5, 5.5, 9.5], labels)
-    plt.xlabel("Collaboration Type")
-    plt.ylabel("Number of Collaborations")
+    plt.xlabel("Country")
+    plt.ylabel("Mean Citations")
 
     # Add a legend
     legend_colors = [patches.Patch(color=color) for color in colors]
@@ -585,11 +588,11 @@ for row in tqdm(eu_df.itertuples()):
             eu_counts += country_list.count("EU")
             eu_citations += citations
         if us_counts > 0:
-            us_ratio_total.append(((us_counts / num_countries), citations, row.type))
+            us_ratio_total.append(((us_counts / num_countries)*100, citations, row.type))
         if eu_counts > 0:
-            eu_ratio_total.append(((eu_counts / num_countries), citations, row.type))
+            eu_ratio_total.append(((eu_counts / num_countries)*100, citations, row.type))
         if cn_counts > 0:
-            cn_ratio_total.append(((cn_counts / num_countries), citations, row.type))
+            cn_ratio_total.append(((cn_counts / num_countries)*100, citations, row.type))
 
 df = pd.DataFrame(us_ratio_total, columns=["ratio", "citations", "type"])
 

@@ -205,7 +205,7 @@ for row in tqdm(eu_df.itertuples()):
     concepts = literal_eval(row.concepts)
     country_list = set(country_list)
     if "US" in country_list:
-        if "US" in country_list and "CN" not in country_list and "EU" not in country_list:
+        if "US" in country_list and "CN" not in country_list and "EU" not in country_list and len(country_list) == 1:
             for concept in concepts:
                 us_topics.append((concept, row.year, row.type))
             continue
@@ -242,7 +242,7 @@ for row in tqdm(eu_df.itertuples()):
     concepts = literal_eval(row.concepts)
     country_list = set(country_list)
     if "CN" in country_list:
-        if "CN" in country_list and "US" not in country_list and "EU" not in country_list:
+        if "CN" in country_list and "US" not in country_list and "EU" not in country_list and len(country_list) == 1:
             for concept in concepts:
                 cn_topics.append((concept, row.year, row.type))
             continue
@@ -345,7 +345,7 @@ for row in tqdm(eu_df.itertuples()):
     concepts = literal_eval(row.concepts)
     country_list = set(country_list)
     if "EU" in country_list:
-        if "EU" in country_list and "US" not in country_list and "CN" not in country_list:
+        if "EU" in country_list and "US" not in country_list and "CN" not in country_list and len(country_list) == 1:
             for concept in concepts:
                 eu_topics.append((concept, row.year, row.type))
             continue

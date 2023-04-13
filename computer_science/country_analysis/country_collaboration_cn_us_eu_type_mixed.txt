@@ -1,6 +1,6 @@
-US - US only collaboration 97951
-CN - CN only collaboration 31749
-EU - EU only collaboration 60050
+US - US only collaboration 58070
+CN - CN only collaboration 24543
+EU - EU only collaboration 37344
 CN - US collaboration 11734
 CN - EU collaboration 3206
 EU - US collaboration 22179
