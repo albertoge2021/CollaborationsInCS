@@ -106,8 +106,8 @@ plt.bar(x_cn, cn_data, color=colors, width=0.8, label="CN")
 plt.bar(x_all, all_data, color="brown", width=0.8, label="EU-CN-US")
 
 # Add the x-axis labels and tick marks
-plt.xticks([1.5, 5.5, 9.5], labels)
-plt.xlabel("Collaboration Type")
+plt.xticks([1.5, 6.5, 11.5], labels)
+plt.xlabel("Country")
 plt.ylabel("Number of Collaborations")
 
 # Create the custom legend
@@ -157,7 +157,7 @@ plt.bar(x_all, all_data, color="brown", width=0.8, label="EU-CN-US")
 
 # Add the x-axis labels and tick marks
 plt.xticks([1.5, 6.5, 11.5], labels)
-plt.xlabel("Collaboration Type")
+plt.xlabel("Country")
 plt.ylabel("Percentage of Collaborations")
 
 # Add a legend
@@ -273,8 +273,8 @@ plt.bar(x_cn, cn_data_means, color=colors, width=0.8, label="CN")
 plt.bar(x_all, all_data_means, color="brown", width=0.8, label="EU-CN-US")
 
 # Add the x-axis labels and tick marks
-plt.xticks([1.5, 5.5, 9.5], labels)
-plt.xlabel("Collaboration Type")
+plt.xticks([1.5, 6.5, 11.5], labels)
+plt.xlabel("Country")
 plt.ylabel("Mean Citations")
 
 # Add a legend
@@ -424,8 +424,8 @@ for collaboration_type in unique_collaboration_types:
     plt.bar(x_all, all_data, color="brown", width=0.8, label="EU-CN-US")
 
     # Add the x-axis labels and tick marks
-    plt.xticks([1.5, 5.5, 9.5], labels)
-    plt.xlabel("Collaboration Type")
+    plt.xticks([1.5, 6.5, 11.5], labels)
+    plt.xlabel("Country")
     plt.ylabel("Number of Collaborations")
 
     # Add a legend
@@ -476,8 +476,8 @@ for collaboration_type in unique_collaboration_types:
     plt.bar(x_all, all_data, color="brown", width=0.8, label="EU-CN-US")
 
     # Add the x-axis labels and tick marks
-    plt.xticks([1.5, 5.5, 9.5], labels)
-    plt.xlabel("Collaboration Type")
+    plt.xticks([1.5, 6.5, 11.5], labels)
+    plt.xlabel("Country")
     plt.ylabel("Percentage of Collaborations")
 
     # Add a legend
@@ -543,7 +543,7 @@ for collaboration_type in unique_collaboration_types:
     plt.bar(x_all, all_data_means, color="brown", width=0.8, label="EU-CN-US")
 
     # Add the x-axis labels and tick marks
-    plt.xticks([1.5, 5.5, 9.5], labels)
+    plt.xticks([1.5, 6.5, 11.5], labels)
     plt.xlabel("Country")
     plt.ylabel("Mean Citations")
 
