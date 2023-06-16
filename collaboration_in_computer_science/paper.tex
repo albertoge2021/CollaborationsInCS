@@ -1,0 +1,148 @@
+\documentclass[APA,STIX1COL]{WileyNJD-v2} %AMA,
+\usepackage{moreverb}
+
+\setcitestyle{aysep={,}, yysep={;}} %Citation-related commands
+
+%zur Einbindung von Graphiken
+\usepackage{graphicx}
+%Bearbeitung von Kopf- und Fusszeile
+\usepackage{fancyhdr}
+%Schriftart
+\usepackage{helvet}
+%stellt unabhängige Textmarken zu Verfügung
+\usepackage{extramarks}
+%aktiviert eine Umgebung in der der Mathematikmodus aktiv ist
+\usepackage{amsmath}
+%coole Zeichentools
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+%aktiviert eine Umgebung in der der Mathematikmodus aktiv ist
+\usepackage{amsthm}
+%aktiviert eine Umgebung in der der Mathematikmodus aktiv ist
+\usepackage{amssymb}
+%Mehrzeilige Tabellen
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{booktabs}
+%For algorithms
+\usepackage{algorithm}
+\usepackage{algpseudocode} % [noend]notwendig? wirft fehler -> sonst Param global uebergeben
+%Für Subfigures
+%\usepackage{caption} 
+\usepackage{subcaption}
+%Stellt das Eurozeichen ? zu Verfügung
+\usepackage[right]{eurosym}
+    % package to open file containing variables
+    \usepackage{datatool, filecontents}
+    \DTLsetseparator{ = }% Set the separator between the columns.
+    
+\def\blankpage{%
+      \clearpage%
+      \thispagestyle{empty}%
+      \addtocounter{page}{-1}%
+      \null%
+      \clearpage}
+
+\usepackage{placeins} 
+%\usepackage[colorinlistoftodos,prependcaption,textsize=tiny,disable]{todonotes}
+
+\usepackage[utf8]{inputenc} 		% Nur einbinden, wenn LuaLatex nicht vorhanden!
+%\usepackage[ngerman, english]{babel} %  Wirft Fehler
+\usepackage[T1]{fontenc}
+
+
+\usepackage[acronyms,ucmark=true]{glossaries}
+\makenoidxglossaries
+
+
+
+\usepackage{fancybox}
+\usepackage{xcolor}
+\usepackage{color}
+\usepackage{float}
+\usepackage{framed}
+%\usepackage{url}
+%\usepackage{newclude} %breaks APA citation style
+\usepackage{diagbox}
+%aktiviert Hyperlinks
+\hypersetup{
+  hidelinks
+}
+\usepackage{hyperref} 
+
+
+\newcommand\BibTeX{{\rmfamily B\kern-.05em \textsc{i\kern-.025em b}\kern-.08em
+T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\articletype{Research Article} % Article Type}%
+
+\received{<day> <Month>, <year>}
+\revised{<day> <Month>, <year>}
+\accepted{<day> <Month>, <year>}
+
+%\raggedbottom
+
+\begin{document}
+
+\title{Benefits of International Collaboration in Computer Science: A Case Study of China, the European Union, and the United States}
+
+\author[1]{Alberto Gómez-Espés*}
+
+\author[2]{Adam Jatowt}
+
+\author[3]{Michael Färber}
+
+\authormark{GÓMEZ-ESPÉS \textsc{et al}}
+
+
+%\address[2]{\orgdiv{Org Division}, \orgname{Org name}, \orgaddress{\state{State name}, \country{Country name}}}
+
+\address[1]{\orgdiv{Department of Information Systems, Production and Logistics Management}, \orgname{University of Innsbruck}, \orgaddress{\state{Tirol}, \country{Austria}}}
+
+\address[2]{\orgdiv{Department of Computer Science}, \orgname{University of Innsbruck}, \orgaddress{\state{Tirol}, \country{Austria}}}
+
+\address[3]{\orgdiv{Institute AIFB}, \orgname{Karlsruhe Institute of Technology (KIT)}, \orgaddress{\state{Baden Württemberg}, \country{Germany}}}
+
+\corres{*Corresponding author name, Corresponding address. \email{Alberto.Gomez-Espes@student.uibk.ac.at}}
+
+\presentaddress{Innrain 52, 6020 Innsbruck, Austria}
+
+\abstract[Abstract]{Co-authored publications can bring positive results for those who participated, such as accessing more funding or increasing the publication impact. China, the European Union, and the United States have been collaborating between them throughout the years in the field of Computer Science. These collaborations have been varying over time, as well as they have impacted the regions in different ways. In this paper, we obtained the publications from these territories across 31 years on the topic of Computer Science and studied them focusing on how the regions have approached co-authorship. In particular, we have analyzed the number of collaborations during that period, the impact of those papers measured as number of citations, and the topics that have been studied in those associations. We have concluded that China’s focus on STEM has led it to be the most productive region in recent years; plus, it has benefited from the US and European impact. On the other hand, the EU and the US have benefited from Chinese funding and workload, increasing the number of publications together.}
+
+\keywords{computer science, co-authorship, collaboration, citation}
+
+\jnlcitation{
+%\cname{%
+%\author{Williams K.}, 
+%\author{G. Masato}, and 
+%\author{T. Woollings}} (\cyear{2016}), 
+%\ctitle{A regime analysis of Atlantic winter jet variability applied to evaluate HadGEM3-GC2}, \cjournal{Q.J.R. Meteorol. Soc.}, \cvol{2017;00:1--6}. 
+}
+
+\maketitle
+
+
+\input{sections/introduction}
+%\include{sections/fundamentals} 
+\input{sections/relatedwork}
+\input{sections/dataset}
+%\input{sections/methodology}
+\input{sections/results}
+\input{sections/discussion}
+\input{sections/limitations}
+
+
+
+% Anhang / Appendix
+%\appendix % Ab hier wird mit A, B, ... weiternummeriert.
+% Für den Fall eines Anhangs entkommentieren
+%\include{sections/appendix}
+
+
+% alle styles waren auskommentiert
+%\bibliographystyle{WileyNJD-APA}%
+%\bibliographystyle{acm}
+
+\bibliography{references}
+
+\end{document}

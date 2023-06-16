@@ -28,9 +28,13 @@ for index, work in df.iterrows():
     new_loc = []
     for location in locations:
         location = dict(location)
-        location["continent"] = pc.convert_country_alpha2_to_continent_code.country_alpha2_to_continent_code(location["country"])
+        location[
+            "continent"
+        ] = pc.convert_country_alpha2_to_continent_code.country_alpha2_to_continent_code(
+            location["country"]
+        )
         new_loc.append(location)
-    df._set_value(index,'location',new_loc)
+    df._set_value(index, "location", new_loc)
 df.to_csv("cs_continents.csv")
 
 df = pd.read_csv("cs_continents.csv")
@@ -68,22 +72,30 @@ for k, v in collabs.items():
 )
 plt.show()"""
 
-#https://ourworldindata.org/human-development-index
+# https://ourworldindata.org/human-development-index
 
-new_df['perc']= 100 * new_df['number'] / new_df.groupby('continent')['number'].transform('sum')
-#new_df.groupby(['continent','collaboration']).sum().unstack().plot(kind='bar',y='perc', stacked=True)
-#plt.show()
+new_df["perc"] = (
+    100 * new_df["number"] / new_df.groupby("continent")["number"].transform("sum")
+)
+# new_df.groupby(['continent','collaboration']).sum().unstack().plot(kind='bar',y='perc', stacked=True)
+# plt.show()
 dev_df = pd.read_csv("human_dev.csv")
 dev_df = dev_df[dev_df["Year"] == 2021]
 
 for index, work in dev_df.iterrows():
-    continent = pc.convert_country_alpha2_to_continent_code.country_alpha2_to_continent_code(pc.country_alpha3_to_country_alpha2(work["Code"]))
-    percentage = new_df[(new_df["continent"] == continent) & (new_df["collaboration"] == continent)].iloc[0]['perc']
-    dev_df._set_value(index,'continent',continent)
-    dev_df._set_value(index,'self_collab', percentage)
+    continent = (
+        pc.convert_country_alpha2_to_continent_code.country_alpha2_to_continent_code(
+            pc.country_alpha3_to_country_alpha2(work["Code"])
+        )
+    )
+    percentage = new_df[
+        (new_df["continent"] == continent) & (new_df["collaboration"] == continent)
+    ].iloc[0]["perc"]
+    dev_df._set_value(index, "continent", continent)
+    dev_df._set_value(index, "self_collab", percentage)
 
 
-means = dev_df.groupby(['continent']).mean("Index")
+means = dev_df.groupby(["continent"]).mean("Index")
 sns.lineplot(data=means, x="Index", y="self_collab")
 plt.show()
 
@@ -91,6 +103,5 @@ sns.lmplot(
     x="Index",
     y="self_collab",
     data=means,
-    
 )
 plt.show()

@@ -53,19 +53,34 @@ for row in tqdm(eu_df.itertuples()):
         citations = row.citations
         if "US" in country_list:
             us_collaborations_total += 1
-            if "US" in country_list and "CN" not in country_list and "EU" not in country_list and len(country_list) == 1:
+            if (
+                "US" in country_list
+                and "CN" not in country_list
+                and "EU" not in country_list
+                and len(country_list) == 1
+            ):
                 us_collaborations += 1
                 us_citations += citations
                 continue
         if "CN" in country_list:
             cn_collaborations_total += 1
-            if "CN" in country_list and "US" not in country_list and "EU" not in country_list and len(country_list) == 1:
+            if (
+                "CN" in country_list
+                and "US" not in country_list
+                and "EU" not in country_list
+                and len(country_list) == 1
+            ):
                 cn_collaborations += 1
                 cn_citations += citations
                 continue
         if "EU" in country_list:
             eu_collaborations_total += 1
-            if "EU" in country_list and "US" not in country_list and "CN" not in country_list and len(country_list) == 1:
+            if (
+                "EU" in country_list
+                and "US" not in country_list
+                and "CN" not in country_list
+                and len(country_list) == 1
+            ):
                 eu_collaborations += 1
                 eu_citations += citations
                 continue
@@ -112,7 +127,12 @@ plt.ylabel("Number of Collaborations")
 
 # Create the custom legend
 legend_colors = [patches.Patch(color=color) for color in colors]
-plt.legend(handles=legend_colors, labels=["US", "EU", "CN", "US-EU-CN"], title="Regions", loc="upper left")
+plt.legend(
+    handles=legend_colors,
+    labels=["US", "EU", "CN", "US-EU-CN"],
+    title="Regions",
+    loc="upper left",
+)
 
 # Show the plot
 plt.savefig(f"computer_science/country_analysis/bar_country_collaboration_cn_us_eu.png")
@@ -162,7 +182,12 @@ plt.ylabel("Percentage of Collaborations")
 
 # Add a legend
 legend_colors = [patches.Patch(color=color) for color in colors]
-plt.legend(handles=legend_colors, labels=["US", "EU", "CN", "US-EU-CN"], title="Regions", loc="upper left")
+plt.legend(
+    handles=legend_colors,
+    labels=["US", "EU", "CN", "US-EU-CN"],
+    title="Regions",
+    loc="upper left",
+)
 
 # Show the plot
 plt.savefig(
@@ -254,7 +279,11 @@ with open(
 us_data_means = [us_mean_citations, us_eu_mean_citations, us_cn_mean_citations]
 eu_data_means = [us_eu_mean_citations, eu_mean_citations, eu_cn_mean_citations]
 cn_data_means = [us_cn_mean_citations, eu_cn_mean_citations, cn_mean_citations]
-all_data_means = [eu_cn_us_mean_citations, eu_cn_us_mean_citations, eu_cn_us_mean_citations]
+all_data_means = [
+    eu_cn_us_mean_citations,
+    eu_cn_us_mean_citations,
+    eu_cn_us_mean_citations,
+]
 
 # Define the x-axis labels
 labels = ["USA", "EU28", "China"]
@@ -279,7 +308,12 @@ plt.ylabel("Mean Citations")
 
 # Add a legend
 legend_colors = [patches.Patch(color=color) for color in colors]
-plt.legend(handles=legend_colors, labels=["US", "EU", "CN", "US-EU-CN"], title="Regions", loc="upper left")
+plt.legend(
+    handles=legend_colors,
+    labels=["US", "EU", "CN", "US-EU-CN"],
+    title="Regions",
+    loc="upper left",
+)
 
 # Show the plot
 plt.savefig(
@@ -320,19 +354,34 @@ for collaboration_type in unique_collaboration_types:
             citations = row.citations
             if "US" in country_list:
                 us_collaborations_total += 1
-                if "US" in country_list and "CN" not in country_list and "EU" not in country_list and len(country_list) == 1:
+                if (
+                    "US" in country_list
+                    and "CN" not in country_list
+                    and "EU" not in country_list
+                    and len(country_list) == 1
+                ):
                     us_collaborations += 1
                     us_citations += citations
                     continue
             if "CN" in country_list:
                 cn_collaborations_total += 1
-                if "CN" in country_list and "US" not in country_list and "EU" not in country_list and len(country_list) == 1:
+                if (
+                    "CN" in country_list
+                    and "US" not in country_list
+                    and "EU" not in country_list
+                    and len(country_list) == 1
+                ):
                     cn_collaborations += 1
                     cn_citations += citations
                     continue
             if "EU" in country_list:
                 eu_collaborations_total += 1
-                if "EU" in country_list and "US" not in country_list and "CN" not in country_list and len(country_list) == 1:
+                if (
+                    "EU" in country_list
+                    and "US" not in country_list
+                    and "CN" not in country_list
+                    and len(country_list) == 1
+                ):
                     eu_collaborations += 1
                     eu_citations += citations
                     continue
@@ -381,7 +430,7 @@ for collaboration_type in unique_collaboration_types:
             f"EU - US collaboration represents {(us_eu_collaborations / eu_collaborations_total) * 100:.2f}% of total EU collaborations\n"
         )
         file.write(
-        f"EU - US - CN collaboration represents {(eu_cn_us_collaborations / us_collaborations_total) * 100:.2f}% of total US collaborations\n"
+            f"EU - US - CN collaboration represents {(eu_cn_us_collaborations / us_collaborations_total) * 100:.2f}% of total US collaborations\n"
         )
         file.write(
             f"EU - US - CN collaboration represents {(eu_cn_us_collaborations / eu_collaborations_total) * 100:.2f}% of total EU collaborations\n"
@@ -406,7 +455,11 @@ for collaboration_type in unique_collaboration_types:
     us_data = [us_collaborations, us_eu_collaborations, us_cn_collaborations]
     eu_data = [us_eu_collaborations, eu_collaborations, eu_cn_collaborations]
     cn_data = [us_cn_collaborations, eu_cn_collaborations, cn_collaborations]
-    all_data = [eu_cn_us_collaborations, eu_cn_us_collaborations, eu_cn_us_collaborations]
+    all_data = [
+        eu_cn_us_collaborations,
+        eu_cn_us_collaborations,
+        eu_cn_us_collaborations,
+    ]
 
     # Define the x-axis labels
     labels = ["USA", "EU28", "China"]
@@ -430,7 +483,12 @@ for collaboration_type in unique_collaboration_types:
 
     # Add a legend
     legend_colors = [patches.Patch(color=color) for color in colors]
-    plt.legend(handles=legend_colors, labels=["US", "EU", "CN", "US-EU-CN"], title="Regions", loc="upper left")
+    plt.legend(
+        handles=legend_colors,
+        labels=["US", "EU", "CN", "US-EU-CN"],
+        title="Regions",
+        loc="upper left",
+    )
 
     # Show the plot
     plt.savefig(
@@ -482,7 +540,12 @@ for collaboration_type in unique_collaboration_types:
 
     # Add a legend
     legend_colors = [patches.Patch(color=color) for color in colors]
-    plt.legend(handles=legend_colors, labels=["US", "EU", "CN", "US-EU-CN"], title="Regions", loc="upper left")
+    plt.legend(
+        handles=legend_colors,
+        labels=["US", "EU", "CN", "US-EU-CN"],
+        title="Regions",
+        loc="upper left",
+    )
 
     # Show the plot
     plt.savefig(
@@ -524,7 +587,11 @@ for collaboration_type in unique_collaboration_types:
     us_data_means = [us_mean_citations, us_eu_mean_citations, us_cn_mean_citations]
     eu_data_means = [us_eu_mean_citations, eu_mean_citations, eu_cn_mean_citations]
     cn_data_means = [us_cn_mean_citations, eu_cn_mean_citations, cn_mean_citations]
-    all_data_means = [eu_cn_us_mean_citations, eu_cn_us_mean_citations, eu_cn_us_mean_citations]
+    all_data_means = [
+        eu_cn_us_mean_citations,
+        eu_cn_us_mean_citations,
+        eu_cn_us_mean_citations,
+    ]
 
     # Define the x-axis labels
     labels = ["USA", "EU28", "China"]
@@ -549,7 +616,12 @@ for collaboration_type in unique_collaboration_types:
 
     # Add a legend
     legend_colors = [patches.Patch(color=color) for color in colors]
-    plt.legend(handles=legend_colors, labels=["US", "EU", "CN", "US-EU-CN"], title="Regions", loc="upper left")
+    plt.legend(
+        handles=legend_colors,
+        labels=["US", "EU", "CN", "US-EU-CN"],
+        title="Regions",
+        loc="upper left",
+    )
 
     # Show the plot
     plt.savefig(
@@ -588,11 +660,17 @@ for row in tqdm(eu_df.itertuples()):
             eu_counts += country_list.count("EU")
             eu_citations += citations
         if us_counts > 0:
-            us_ratio_total.append(((us_counts / num_countries)*100, citations, row.type))
+            us_ratio_total.append(
+                ((us_counts / num_countries) * 100, citations, row.type)
+            )
         if eu_counts > 0:
-            eu_ratio_total.append(((eu_counts / num_countries)*100, citations, row.type))
+            eu_ratio_total.append(
+                ((eu_counts / num_countries) * 100, citations, row.type)
+            )
         if cn_counts > 0:
-            cn_ratio_total.append(((cn_counts / num_countries)*100, citations, row.type))
+            cn_ratio_total.append(
+                ((cn_counts / num_countries) * 100, citations, row.type)
+            )
 
 df = pd.DataFrame(us_ratio_total, columns=["ratio", "citations", "type"])
 

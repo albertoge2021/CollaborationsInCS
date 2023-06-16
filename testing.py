@@ -33,12 +33,21 @@ for row in tqdm(eu_df.itertuples()):
     concepts = literal_eval(row.concepts)
     country_list = set(country_list)
     if "EU" in country_list:
-        if "EU" in country_list and "US" not in country_list and "CN" not in country_list and len(country_list) == 1:
+        if (
+            "EU" in country_list
+            and "US" not in country_list
+            and "CN" not in country_list
+            and len(country_list) == 1
+        ):
             for concept in concepts:
                 eu_topics.append((concept, row.year, row.type))
             continue
         else:
-            if "US" in country_list and "EU" in country_list and not "CN" in country_list:
+            if (
+                "US" in country_list
+                and "EU" in country_list
+                and not "CN" in country_list
+            ):
                 for concept in concepts:
                     us_eu_topics.append((concept, row.year, row.type))
 
@@ -56,7 +65,12 @@ for row in tqdm(eu_df.itertuples()):
     concepts = literal_eval(row.concepts)
     country_list = set(country_list)
     if "US" in country_list:
-        if "US" in country_list and "CN" not in country_list and "EU" not in country_list and len(country_list) == 1:
+        if (
+            "US" in country_list
+            and "CN" not in country_list
+            and "EU" not in country_list
+            and len(country_list) == 1
+        ):
             for concept in concepts:
                 us_topics.append((concept, row.year, row.type))
             continue
@@ -68,7 +82,9 @@ df = df[df["concept"] != "Computer science"]
 grouped = df.groupby(["year", "concept"])["concept"].count()
 
 # Sort the resulting dataframe by year and the count of occurrences, in descending order
-sorted_df = grouped.reset_index(name="count").sort_values(["year", "count"], ascending=[True, False])
+sorted_df = grouped.reset_index(name="count").sort_values(
+    ["year", "count"], ascending=[True, False]
+)
 
 # Use the groupby function to group the dataframe by year, and select the top ten concepts with the highest number of occurrences in each year using the head() function
 top10_df = sorted_df.groupby("year").head(10)
@@ -83,9 +99,7 @@ pivot_df.plot(kind="line", figsize=(12, 8))
 plt.xlabel("Year")
 plt.ylabel("Number of Occurrences")
 plt.title("Top 10 Most Repeated Concepts by Year")
-plt.savefig(
-    f"computer_science/topic_analysis/line_topics_second_by_year_us.png"
-)
+plt.savefig(f"computer_science/topic_analysis/line_topics_second_by_year_us.png")
 plt.close()
 
 cn_topics = []
@@ -103,22 +117,34 @@ for row in tqdm(eu_df.itertuples()):
     concepts = literal_eval(row.concepts)
     country_list = set(country_list)
     if "CN" in country_list:
-        if "CN" in country_list and "US" not in country_list and "EU" not in country_list and len(country_list) == 1:
+        if (
+            "CN" in country_list
+            and "US" not in country_list
+            and "EU" not in country_list
+            and len(country_list) == 1
+        ):
             for concept in concepts:
                 cn_topics.append((concept, row.year, row.type))
             continue
         else:
-            if "US" in country_list and "CN" in country_list and not "EU" in country_list:
+            if (
+                "US" in country_list
+                and "CN" in country_list
+                and not "EU" in country_list
+            ):
                 for concept in concepts:
                     cn_us_topics.append((concept, row.year, row.type))
-            if "EU" in country_list and "CN" in country_list and not "US" in country_list:
+            if (
+                "EU" in country_list
+                and "CN" in country_list
+                and not "US" in country_list
+            ):
                 for concept in concepts:
                     eu_cn_topics.append((concept, row.year, row.type))
     if "EU" in country_list and "CN" in country_list and "US" in country_list:
         for concept in concepts:
-                cn_eu_us_topics.append((concept, row.year, row.type))
+            cn_eu_us_topics.append((concept, row.year, row.type))
         continue
-
 
 
 df = pd.DataFrame(cn_topics, columns=["concept", "year", "type"])
@@ -129,7 +155,9 @@ df = df[df["concept"] != "Computer science"]
 grouped = df.groupby(["year", "concept"])["concept"].count()
 
 # Sort the resulting dataframe by year and the count of occurrences, in descending order
-sorted_df = grouped.reset_index(name="count").sort_values(["year", "count"], ascending=[True, False])
+sorted_df = grouped.reset_index(name="count").sort_values(
+    ["year", "count"], ascending=[True, False]
+)
 
 # Use the groupby function to group the dataframe by year, and select the top ten concepts with the highest number of occurrences in each year using the head() function
 top10_df = sorted_df.groupby("year").head(10)
@@ -144,9 +172,7 @@ pivot_df.plot(kind="line", figsize=(12, 8))
 plt.xlabel("Year")
 plt.ylabel("Number of Occurrences")
 plt.title("Top 10 Most Repeated Concepts by Year")
-plt.savefig(
-    f"computer_science/topic_analysis/line_topics_second_by_year_cn.png"
-)
+plt.savefig(f"computer_science/topic_analysis/line_topics_second_by_year_cn.png")
 plt.close()
 
 df = pd.DataFrame(cn_eu_us_topics, columns=["concept", "year", "type"])
@@ -157,7 +183,9 @@ df = df[df["concept"] != "Computer science"]
 grouped = df.groupby(["year", "concept"])["concept"].count()
 
 # Sort the resulting dataframe by year and the count of occurrences, in descending order
-sorted_df = grouped.reset_index(name="count").sort_values(["year", "count"], ascending=[True, False])
+sorted_df = grouped.reset_index(name="count").sort_values(
+    ["year", "count"], ascending=[True, False]
+)
 
 # Use the groupby function to group the dataframe by year, and select the top ten concepts with the highest number of occurrences in each year using the head() function
 top10_df = sorted_df.groupby("year").head(10)
@@ -172,9 +200,7 @@ pivot_df.plot(kind="line", figsize=(12, 8))
 plt.xlabel("Year")
 plt.ylabel("Number of Occurrences")
 plt.title("Top 10 Most Repeated Concepts by Year")
-plt.savefig(
-    f"computer_science/topic_analysis/line_topics_second_by_year_cn_us_eu.png"
-)
+plt.savefig(f"computer_science/topic_analysis/line_topics_second_by_year_cn_us_eu.png")
 plt.close()
 
 df = pd.DataFrame(cn_us_topics, columns=["concept", "year", "type"])
@@ -185,7 +211,9 @@ df = df[df["concept"] != "Computer science"]
 grouped = df.groupby(["year", "concept"])["concept"].count()
 
 # Sort the resulting dataframe by year and the count of occurrences, in descending order
-sorted_df = grouped.reset_index(name="count").sort_values(["year", "count"], ascending=[True, False])
+sorted_df = grouped.reset_index(name="count").sort_values(
+    ["year", "count"], ascending=[True, False]
+)
 
 # Use the groupby function to group the dataframe by year, and select the top ten concepts with the highest number of occurrences in each year using the head() function
 top10_df = sorted_df.groupby("year").head(10)
@@ -200,9 +228,7 @@ pivot_df.plot(kind="line", figsize=(12, 8))
 plt.xlabel("Year")
 plt.ylabel("Number of Occurrences")
 plt.title("Top 10 Most Repeated Concepts by Year")
-plt.savefig(
-    f"computer_science/topic_analysis/line_topics_second_by_year_cn_us.png"
-)
+plt.savefig(f"computer_science/topic_analysis/line_topics_second_by_year_cn_us.png")
 plt.close()
 
 df = pd.DataFrame(eu_cn_topics, columns=["concept", "year", "type"])
@@ -213,7 +239,9 @@ df = df[df["concept"] != "Computer science"]
 grouped = df.groupby(["year", "concept"])["concept"].count()
 
 # Sort the resulting dataframe by year and the count of occurrences, in descending order
-sorted_df = grouped.reset_index(name="count").sort_values(["year", "count"], ascending=[True, False])
+sorted_df = grouped.reset_index(name="count").sort_values(
+    ["year", "count"], ascending=[True, False]
+)
 
 # Use the groupby function to group the dataframe by year, and select the top ten concepts with the highest number of occurrences in each year using the head() function
 top10_df = sorted_df.groupby("year").head(10)
@@ -228,9 +256,7 @@ pivot_df.plot(kind="line", figsize=(12, 8))
 plt.xlabel("Year")
 plt.ylabel("Number of Occurrences")
 plt.title("Top 10 Most Repeated Concepts by Year")
-plt.savefig(
-    f"computer_science/topic_analysis/line_topics_second_by_year_cn_eu.png"
-)
+plt.savefig(f"computer_science/topic_analysis/line_topics_second_by_year_cn_eu.png")
 plt.close()
 
 eu_topics = []
@@ -246,12 +272,21 @@ for row in tqdm(eu_df.itertuples()):
     concepts = literal_eval(row.concepts)
     country_list = set(country_list)
     if "EU" in country_list:
-        if "EU" in country_list and "US" not in country_list and "CN" not in country_list and len(country_list) == 1:
+        if (
+            "EU" in country_list
+            and "US" not in country_list
+            and "CN" not in country_list
+            and len(country_list) == 1
+        ):
             for concept in concepts:
                 eu_topics.append((concept, row.year, row.type))
             continue
         else:
-            if "US" in country_list and "EU" in country_list and not "CN" in country_list:
+            if (
+                "US" in country_list
+                and "EU" in country_list
+                and not "CN" in country_list
+            ):
                 for concept in concepts:
                     us_eu_topics.append((concept, row.year, row.type))
 
@@ -263,7 +298,9 @@ df = df[df["concept"] != "Computer science"]
 grouped = df.groupby(["year", "concept"])["concept"].count()
 
 # Sort the resulting dataframe by year and the count of occurrences, in descending order
-sorted_df = grouped.reset_index(name="count").sort_values(["year", "count"], ascending=[True, False])
+sorted_df = grouped.reset_index(name="count").sort_values(
+    ["year", "count"], ascending=[True, False]
+)
 
 # Use the groupby function to group the dataframe by year, and select the top ten concepts with the highest number of occurrences in each year using the head() function
 top10_df = sorted_df.groupby("year").head(10)
@@ -278,9 +315,7 @@ pivot_df.plot(kind="line", figsize=(12, 8))
 plt.xlabel("Year")
 plt.ylabel("Number of Occurrences")
 plt.title("Top 10 Most Repeated Concepts by Year")
-plt.savefig(
-    f"computer_science/topic_analysis/line_topics_second_by_year_eu.png"
-)
+plt.savefig(f"computer_science/topic_analysis/line_topics_second_by_year_eu.png")
 plt.close()
 
 
@@ -291,7 +326,9 @@ df = df[df["concept"] != "Computer science"]
 grouped = df.groupby(["year", "concept"])["concept"].count()
 
 # Sort the resulting dataframe by year and the count of occurrences, in descending order
-sorted_df = grouped.reset_index(name="count").sort_values(["year", "count"], ascending=[True, False])
+sorted_df = grouped.reset_index(name="count").sort_values(
+    ["year", "count"], ascending=[True, False]
+)
 
 # Use the groupby function to group the dataframe by year, and select the top ten concepts with the highest number of occurrences in each year using the head() function
 top10_df = sorted_df.groupby("year").head(10)
@@ -306,7 +343,5 @@ pivot_df.plot(kind="line", figsize=(12, 8))
 plt.xlabel("Year")
 plt.ylabel("Number of Occurrences")
 plt.title("Top 10 Most Repeated Concepts by Year")
-plt.savefig(
-    f"computer_science/topic_analysis/line_topics_second_by_year_us_eu.png"
-)
+plt.savefig(f"computer_science/topic_analysis/line_topics_second_by_year_us_eu.png")
 plt.close()

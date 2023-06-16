@@ -18,7 +18,7 @@ for index, work in df.iterrows():
         city = location["city"]
         state = location["state"]
         country = location["country"]
-        
+
         new_df = new_df.append(
             pd.Series(
                 [city, state, country, work["type"], work["concepts"]],
@@ -26,12 +26,12 @@ for index, work in df.iterrows():
             ),
             ignore_index=True,
         )
-new_df = (
-    new_df.groupby(["city", "country", "type"])
-    .size()
-    .reset_index(name="count")
-)
-new_df = new_df[(new_df["country"] == "DE") | (new_df["country"] == "AT") | (new_df["country"] == "CH")]
+new_df = new_df.groupby(["city", "country", "type"]).size().reset_index(name="count")
+new_df = new_df[
+    (new_df["country"] == "DE")
+    | (new_df["country"] == "AT")
+    | (new_df["country"] == "CH")
+]
 df_pivot = pd.pivot_table(
     new_df,
     values="count",

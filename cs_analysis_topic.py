@@ -15,8 +15,8 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 # https://towardsdatascience.com/what-are-the-commonly-used-statistical-tests-in-data-science-a95cfc2e6b5e
 
 # Setup Data
-#dev_df = pd.read_csv("human_dev_standard.csv")
-#df = pd.read_csv("cs_mean.csv")
+# dev_df = pd.read_csv("human_dev_standard.csv")
+# df = pd.read_csv("cs_mean.csv")
 eu_df = pd.read_csv("cs_eu.csv")
 unique_collaboration_types = eu_df["type"].unique()
 selected_countries = ["US", "CN", "EU"]
@@ -205,26 +205,29 @@ for row in tqdm(eu_df.itertuples()):
     concepts = literal_eval(row.concepts)
     country_list = set(country_list)
     if "US" in country_list:
-        if "US" in country_list and "CN" not in country_list and "EU" not in country_list and len(country_list) == 1:
+        if (
+            "US" in country_list
+            and "CN" not in country_list
+            and "EU" not in country_list
+            and len(country_list) == 1
+        ):
             for concept in concepts:
                 us_topics.append((concept, row.year, row.type))
             continue
 
 df = pd.DataFrame(us_topics, columns=["concept", "year", "type"])
 test = (
-    df.groupby('concept').size().reset_index(name='count')
+    df.groupby("concept")
+    .size()
+    .reset_index(name="count")
     .sort_values(by=["count"], ascending=False)
     .head(11)
 )
 test.drop(test[test["concept"] == "Computer science"].index, inplace=True)
 new_df = df.loc[df["concept"].isin(test.concept.to_list())]
-means_full = (
-    new_df.groupby(["concept", "year"]).size().reset_index(name='count')
-)
+means_full = new_df.groupby(["concept", "year"]).size().reset_index(name="count")
 sns.lineplot(data=means_full, x="year", y="count", hue="concept")
-plt.savefig(
-    f"computer_science/topic_analysis/line_topics_by_year_us.png"
-)
+plt.savefig(f"computer_science/topic_analysis/line_topics_by_year_us.png")
 plt.close()
 
 cn_topics = []
@@ -242,94 +245,98 @@ for row in tqdm(eu_df.itertuples()):
     concepts = literal_eval(row.concepts)
     country_list = set(country_list)
     if "CN" in country_list:
-        if "CN" in country_list and "US" not in country_list and "EU" not in country_list and len(country_list) == 1:
+        if (
+            "CN" in country_list
+            and "US" not in country_list
+            and "EU" not in country_list
+            and len(country_list) == 1
+        ):
             for concept in concepts:
                 cn_topics.append((concept, row.year, row.type))
             continue
         else:
-            if "US" in country_list and "CN" in country_list and not "EU" in country_list:
+            if (
+                "US" in country_list
+                and "CN" in country_list
+                and not "EU" in country_list
+            ):
                 for concept in concepts:
                     cn_us_topics.append((concept, row.year, row.type))
-            if "EU" in country_list and "CN" in country_list and not "US" in country_list:
+            if (
+                "EU" in country_list
+                and "CN" in country_list
+                and not "US" in country_list
+            ):
                 for concept in concepts:
                     eu_cn_topics.append((concept, row.year, row.type))
     if "EU" in country_list and "CN" in country_list and "US" in country_list:
         for concept in concepts:
-                cn_eu_us_topics.append((concept, row.year, row.type))
+            cn_eu_us_topics.append((concept, row.year, row.type))
         continue
-
 
 
 df = pd.DataFrame(cn_topics, columns=["concept", "year", "type"])
 
 test = (
-    df.groupby('concept').size().reset_index(name='count')
+    df.groupby("concept")
+    .size()
+    .reset_index(name="count")
     .sort_values(by=["count"], ascending=False)
     .head(11)
 )
 test.drop(test[test["concept"] == "Computer science"].index, inplace=True)
 new_df = df.loc[df["concept"].isin(test.concept.to_list())]
-means_full = (
-    new_df.groupby(["concept", "year"]).size().reset_index(name='count')
-)
+means_full = new_df.groupby(["concept", "year"]).size().reset_index(name="count")
 sns.lineplot(data=means_full, x="year", y="count", hue="concept")
-plt.savefig(
-    f"computer_science/topic_analysis/line_topics_by_year_cn.png"
-)
+plt.savefig(f"computer_science/topic_analysis/line_topics_by_year_cn.png")
 plt.close()
 
 df = pd.DataFrame(cn_eu_us_topics, columns=["concept", "year", "type"])
 
 test = (
-    df.groupby('concept').size().reset_index(name='count')
+    df.groupby("concept")
+    .size()
+    .reset_index(name="count")
     .sort_values(by=["count"], ascending=False)
     .head(11)
 )
 test.drop(test[test["concept"] == "Computer science"].index, inplace=True)
 new_df = df.loc[df["concept"].isin(test.concept.to_list())]
-means_full = (
-    new_df.groupby(["concept", "year"]).size().reset_index(name='count')
-)
+means_full = new_df.groupby(["concept", "year"]).size().reset_index(name="count")
 sns.lineplot(data=means_full, x="year", y="count", hue="concept")
-plt.savefig(
-    f"computer_science/topic_analysis/line_topics_by_year_cn_us_eu.png"
-)
+plt.savefig(f"computer_science/topic_analysis/line_topics_by_year_cn_us_eu.png")
 plt.close()
 
 df = pd.DataFrame(cn_us_topics, columns=["concept", "year", "type"])
 
 test = (
-    df.groupby('concept').size().reset_index(name='count')
+    df.groupby("concept")
+    .size()
+    .reset_index(name="count")
     .sort_values(by=["count"], ascending=False)
     .head(11)
 )
 test.drop(test[test["concept"] == "Computer science"].index, inplace=True)
 new_df = df.loc[df["concept"].isin(test.concept.to_list())]
-means_full = (
-    new_df.groupby(["concept", "year"]).size().reset_index(name='count')
-)
+means_full = new_df.groupby(["concept", "year"]).size().reset_index(name="count")
 sns.lineplot(data=means_full, x="year", y="count", hue="concept")
-plt.savefig(
-    f"computer_science/topic_analysis/line_topics_by_year_cn_us.png"
-)
+plt.savefig(f"computer_science/topic_analysis/line_topics_by_year_cn_us.png")
 plt.close()
 
 df = pd.DataFrame(eu_cn_topics, columns=["concept", "year", "type"])
 
 test = (
-    df.groupby('concept').size().reset_index(name='count')
+    df.groupby("concept")
+    .size()
+    .reset_index(name="count")
     .sort_values(by=["count"], ascending=False)
     .head(11)
 )
 test.drop(test[test["concept"] == "Computer science"].index, inplace=True)
 new_df = df.loc[df["concept"].isin(test.concept.to_list())]
-means_full = (
-    new_df.groupby(["concept", "year"]).size().reset_index(name='count')
-)
+means_full = new_df.groupby(["concept", "year"]).size().reset_index(name="count")
 sns.lineplot(data=means_full, x="year", y="count", hue="concept")
-plt.savefig(
-    f"computer_science/topic_analysis/line_topics_by_year_cn_eu.png"
-)
+plt.savefig(f"computer_science/topic_analysis/line_topics_by_year_cn_eu.png")
 plt.close()
 
 eu_topics = []
@@ -345,47 +352,52 @@ for row in tqdm(eu_df.itertuples()):
     concepts = literal_eval(row.concepts)
     country_list = set(country_list)
     if "EU" in country_list:
-        if "EU" in country_list and "US" not in country_list and "CN" not in country_list and len(country_list) == 1:
+        if (
+            "EU" in country_list
+            and "US" not in country_list
+            and "CN" not in country_list
+            and len(country_list) == 1
+        ):
             for concept in concepts:
                 eu_topics.append((concept, row.year, row.type))
             continue
         else:
-            if "US" in country_list and "EU" in country_list and not "CN" in country_list:
+            if (
+                "US" in country_list
+                and "EU" in country_list
+                and not "CN" in country_list
+            ):
                 for concept in concepts:
                     us_eu_topics.append((concept, row.year, row.type))
 
 df = pd.DataFrame(eu_topics, columns=["concept", "year", "type"])
 
 test = (
-    df.groupby('concept').size().reset_index(name='count')
+    df.groupby("concept")
+    .size()
+    .reset_index(name="count")
     .sort_values(by=["count"], ascending=False)
     .head(11)
 )
 test.drop(test[test["concept"] == "Computer science"].index, inplace=True)
 new_df = df.loc[df["concept"].isin(test.concept.to_list())]
-means_full = (
-    new_df.groupby(["concept", "year"]).size().reset_index(name='count')
-)
+means_full = new_df.groupby(["concept", "year"]).size().reset_index(name="count")
 sns.lineplot(data=means_full, x="year", y="count", hue="concept")
-plt.savefig(
-    f"computer_science/topic_analysis/line_topics_by_year_eu.png"
-)
+plt.savefig(f"computer_science/topic_analysis/line_topics_by_year_eu.png")
 plt.close()
 
 
 df = pd.DataFrame(us_eu_topics, columns=["concept", "year", "type"])
 test = (
-    df.groupby('concept').size().reset_index(name='count')
+    df.groupby("concept")
+    .size()
+    .reset_index(name="count")
     .sort_values(by=["count"], ascending=False)
     .head(11)
 )
 test.drop(test[test["concept"] == "Computer science"].index, inplace=True)
 new_df = df.loc[df["concept"].isin(test.concept.to_list())]
-means_full = (
-    new_df.groupby(["concept", "year"]).size().reset_index(name='count')
-)
+means_full = new_df.groupby(["concept", "year"]).size().reset_index(name="count")
 sns.lineplot(data=means_full, x="year", y="count", hue="concept")
-plt.savefig(
-    f"computer_science/topic_analysis/line_topics_by_year_us_eu.png"
-)
+plt.savefig(f"computer_science/topic_analysis/line_topics_by_year_us_eu.png")
 plt.close()

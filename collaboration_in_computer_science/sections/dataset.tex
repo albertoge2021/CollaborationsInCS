@@ -1,0 +1,16 @@
+\section{Data Set}
+\label{sec:data_set}
+
+\subsection{Dataset}
+
+For our analysis, we used OpenAlex as data source, a fully open scientific knowledge graph (SKG) that replaces the previously discontinued Microsoft Academic Graph (MAG) \citep{priem2022openalex}. On 15th of April of 2023, the OpenAlex dataset had 245M works, which include journal articles, books, datasets, and theses. OpenAlex allows using filters in advance, setting thresholds to the search, and therefore reducing the processing time.
+
+\subsection{Data collection}
+
+In the following section, we discuss the process we followed for the data collection. 
+
+We gathered information on the works by utilizing OpenAlex API, using various filters. First, we filtered works by the “computer science” concept, considering only journal articles, and limiting the publication year from 1990 to 2021, both inclusive. In addition to this, we filtered retracted publications.
+
+\subsection{Data preprocessing}
+
+Before starting to work with the data, we had to pre-process the raw data. As the scope of this research paper is to analyze the collaboration patterns between different countries and regions, papers written by just one author were removed, and we only considered publications whose all authors were affiliated with an educational or company institution. There were works that did not have their DOI code attached, nor either the number of citations that were also removed. To categorize the publications, we added a tag to mark each work based on the institutions’ type that participated in the collaboration. Therefore, works where all participants were affiliated with educational institutions, such as universities, were categorized as “educational”, works where all participants came from profit-oriented private corporations were categorized as “company”, and those works done by both were marked as “mixed”. In this experiment, we considered EU publications published by the EU27 as well as the UK to simplify, and China publications published by “China Mainland”. It resulted in a dataset composed of 2.443.196 research papers.

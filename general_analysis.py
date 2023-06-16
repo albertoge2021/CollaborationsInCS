@@ -57,15 +57,15 @@ company SignificanceResult(statistic=-0.06969926044398334, pvalue=0.043307710241
 """
 
 
-#Plot regression
-#sns.lmplot(
+# Plot regression
+# sns.lmplot(
 #    x="dist_trunc",
 #    y="count",
 #    hue="type",
 #    data=new_df,
 #    scatter=False,
-#)
-#plt.show()
+# )
+# plt.show()
 """
 Photo in folder
 """
@@ -79,39 +79,39 @@ Photo in folder
 Photo in folder
 """
 
-#Probability distribution
-#for major in unique_majors:
+# Probability distribution
+# for major in unique_majors:
 #    stats.probplot(df[df['type'] == major]['distance'], dist="norm", plot=plt)
 #    plt.title("Probability Plot - " +  major)
 #    plt.show()
 
-#Boxplot
-#df.boxplot(by ='type', column =['distance'], grid = False)
-#plt.show()
+# Boxplot
+# df.boxplot(by ='type', column =['distance'], grid = False)
+# plt.show()
 """
 Photo in folder
 """
 
-#Denstity
-#new_df.groupby('type')['dist_trunc'].plot(kind='kde')
-#plt.legend(['Company', 'Education', 'Mixed'], title='Relationship')
-#plt.xlabel('Distance')
-#plt.show()
+# Denstity
+# new_df.groupby('type')['dist_trunc'].plot(kind='kde')
+# plt.legend(['Company', 'Education', 'Mixed'], title='Relationship')
+# plt.xlabel('Distance')
+# plt.show()
 """
 Photo in folder
 """
 
-#Probabilty
-#sns.displot(new_df, x="dist_trunc", hue="type", stat="probability", common_norm=False)
-#plt.xlabel('Distance')
-#plt.show()
+# Probabilty
+# sns.displot(new_df, x="dist_trunc", hue="type", stat="probability", common_norm=False)
+# plt.xlabel('Distance')
+# plt.show()
 """
 Photo in folder
 """
 
-#Histogram
-#ax = df.plot.hist(column=["distance"], by="type", figsize=(10, 8))
-#plt.show()
+# Histogram
+# ax = df.plot.hist(column=["distance"], by="type", figsize=(10, 8))
+# plt.show()
 """
 Photo in folder
 """

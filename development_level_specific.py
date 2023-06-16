@@ -11,14 +11,62 @@ from scipy.stats import f_oneway
 from scipy.stats import shapiro
 import pycountry_convert as pc
 import warnings
+
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
 # https://www.cwauthors.com/article/Four-common-statistical-test-ideas-to-share-with-your-academic-colleagues
 # https://towardsdatascience.com/what-are-the-commonly-used-statistical-tests-in-data-science-a95cfc2e6b5e
 
-#https://unctad.org/topic/least-developed-countries/list
-dev_countries = ['AO', 'BJ', 'BF', 'BI', 'CF', 'TD', 'KM', 'CD', 'DJ', 'ER', 'ET', 'GM', 'GN', 'GW', 'LS', 'LR', 'MG', 'MW', 'ML', 'MR', 'MZ', 'NE', 'RW', 'ST', 'SN', 'SL', 'SO', 'SS', 'SD', 'TG', 'UG', 'TZ', 'ZM', 'AF', 'BD', 'BT', 'KH', 'LA', 'MM', 'NP', 'TL', 'YE', 'HT', 'KI', 'SB', 'TV']
+# https://unctad.org/topic/least-developed-countries/list
+dev_countries = [
+    "AO",
+    "BJ",
+    "BF",
+    "BI",
+    "CF",
+    "TD",
+    "KM",
+    "CD",
+    "DJ",
+    "ER",
+    "ET",
+    "GM",
+    "GN",
+    "GW",
+    "LS",
+    "LR",
+    "MG",
+    "MW",
+    "ML",
+    "MR",
+    "MZ",
+    "NE",
+    "RW",
+    "ST",
+    "SN",
+    "SL",
+    "SO",
+    "SS",
+    "SD",
+    "TG",
+    "UG",
+    "TZ",
+    "ZM",
+    "AF",
+    "BD",
+    "BT",
+    "KH",
+    "LA",
+    "MM",
+    "NP",
+    "TL",
+    "YE",
+    "HT",
+    "KI",
+    "SB",
+    "TV",
+]
 # Setup Data
 
 """dev_df = pd.read_csv("human_dev.csv")

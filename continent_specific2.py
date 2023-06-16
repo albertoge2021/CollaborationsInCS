@@ -35,14 +35,30 @@ df.to_csv("cs_continents.csv")"""
 
 df = pd.read_csv("cs_continents.csv")
 
-new_df = pd.DataFrame({"continent": str, "collaboration": str, "type":str, "citations": int, "year":int, "concepts":[]})
+new_df = pd.DataFrame(
+    {
+        "continent": str,
+        "collaboration": str,
+        "type": str,
+        "citations": int,
+        "year": int,
+        "concepts": [],
+    }
+)
 for index, work in df.iterrows():
     locations = literal_eval(work["location"])
     first_continent = locations[0]["continent"]
     for continent in locations[1:]:
         new_df = new_df.append(
             pd.Series(
-                [first_continent, continent["continent"], work["type"], work["citations"], work["year"], work["concepts"]],
+                [
+                    first_continent,
+                    continent["continent"],
+                    work["type"],
+                    work["citations"],
+                    work["year"],
+                    work["concepts"],
+                ],
                 index=new_df.columns,
             ),
             ignore_index=True,

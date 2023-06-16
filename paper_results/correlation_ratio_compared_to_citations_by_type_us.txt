@@ -1,0 +1,8 @@
+Pearson test for education - PearsonRResult(statistic=0.01150007164903351, pvalue=1.690478645469167e-31)1030766
+Spearman test for education - SignificanceResult(statistic=-0.013862905739913575, pvalue=5.3950092297396315e-45)1030766
+Pearson test for company - PearsonRResult(statistic=0.0073070668295301565, pvalue=0.16994637878345384)35276
+Spearman test for company - SignificanceResult(statistic=0.0722493788382238, pvalue=4.777124646882029e-42)35276
+Pearson test for mixed - PearsonRResult(statistic=0.027842053756061566, pvalue=1.7277760827978015e-19)105135
+Spearman test for mixed - SignificanceResult(statistic=0.08423797722434453, pvalue=7.755991963731179e-165)105135
+Pearson test general - PearsonRResult(statistic=0.012505655854993965, pvalue=9.817669840535746e-42)1171177
+Spearman test general - SignificanceResult(statistic=-0.004698192380048128, pvalue=3.6869251497039743e-07)1171177

@@ -1,0 +1,304 @@
+\section{Diversity Framework} % {Methodology}
+\label{sec:methodology}
+
+To investigate the mixture and diversity of topics of news articles, we first extract the topics from the headlines. This is a text mining and natural language processing task, usually based on topic modeling in existing works. 
+% Given a corpus of documents, in our case the headlines, topic modeling identifies underlying topics in these documents. 
+Having the allocation between headlines and topics, we can investigate the diversity of the result sets.
+
+\subsection{Topic Modeling}
+
+Topic modeling is based on the assumption that documents are composed of one or more topics. We used two topic modeling methods to see which performs superior on our data set. The first one being 
+% the state-of-the art probabilistic topic model, LDA.
+the widely used Latent Dirichlet Allocation (LDA). Existing literature pointed out that LDA perform weak on shorter texts (even when optimized) as there is little word co-occurrence information \citep{lin_dual-sparse_2014, qiang_short_2020, li_enhancing_2017}. Furthermore, LDA assumes that there are multiple topics in a document, which might not be true for headlines. 
+Considering only headlines, our documents are very short, namely in the case of the Top Stories data set on average \var{title_length_avg} words with a standard deviation of \var{title_length_std}. 
+% Usually LDA documents are longer. 
+The authors of the survey \citet{qiang_short_2020} 
+% created a survey on Short Text Topic Modelling. In their study they 
+identified GPU-PDMM as best algorithm for their Google News data set with the highest classification accuracy \citep{qiang_short_2020}. We therefore use this method as second one for our work. 
+
+GPU-PDMM is a Poisson-based Dirichlet Multinomial Mixture model (PDMM) 
+with a generalized Pólya urn (GPU) model. 
+Despite its reliance on a Poisson-based model, each document consists of only a few topics \citep{qiang_short_2020}.  Using the GPU-model, additional external knowledge about word semantics can be used to improve topic modelling, especially with short texts \citep{li_enhancing_2017}. This paper will build on \citet{qiang_short_2020}'s result and use a JAVA implementation\footnote{\href{https://github.com/qiang2100/STTM}{https://github.com/qiang2100/STTM} (Last accessed 01/03/2022)} of GPU-PDMM and LDA provided by \citet{qiang_short_2020}.
+
+
+%\subsubsection
+\textbf{Preparing Data Set for Topic Modeling.}
+To identify the topics in the overall news as accurately as possible, we 
+% provide it 
+consider 
+not only the data gathered from Google Top Stories, but also from Google News and Bing News. 
+% Therefore, our used corpus are the headlines from all three, our control data set.
+
+To run topic modeling, the headlines 
+% need to be preprocessed. 
+% In the preprocessing described in \textit{\ref{subsec:data_preprocessing} \nameref{subsec:data_preprocessing}}, additional pre- and suffixes were already deleted. The goal of preprocessing is to reduce the complexity of the documents. Here, the following state-of-the-art steps were performed: 
+% For preprocessing, we perform the following steps: 
+are preprocessed, including (i)~the removal of special characters, (ii)~lower casing text, (iii)~lower casing text, (iv)~tokenization of text, (v)~lemmatizing, (vi)~the removal of rare words (with fewer than 3 occurrences), and (vii)~the removal of words with little context.
+
+
+%\subsubsection
+\textbf{Running Topic Modeling on our Data Set. }
+\label{subsec:running_topicmodelling}
+%
+As we are using only two different topic modeling approaches using the default values (except the number of iterations for GPU-PDMM, as GPU-PDMM performs well even with little iterations \citep{qiang_short_2020}), this yields an open question of further optimizing the topic modelling. 
+The $\alpha$ and $\beta$ hyperparameters of our approaches are based on defaults used in the literature\footnote{\url{https://github.com/qiang2100/STTM}}. All used parameters are noted in Table \textit{\ref{table:topic_modelling_parameters}}.
+
+%\input{tables/topic_modelling_parameters}
+\begin{table}[tb]
+\centering
+\begin{tabular}{lcc}
+\toprule 
+    & \textbf{LDA }
+    & \textbf{GPU-PDMM}
+\\ 
+\midrule
+    Number of topics    
+    & 3-50
+    & 3-50
+\\
+    Number of iterations    
+    & 1000
+    & 48
+\\
+    $\alpha$ hyperparameter     
+    & 0.1
+    & 0.1
+\\
+    $\beta$ hyperparameter
+    & 0.01
+    & 0.01
+\\
+\bottomrule
+\end{tabular}
+\caption{Topic modelling parameters}
+\label{table:topic_modelling_parameters}
+\end{table}
+
+To select the optimal amount of topics, we run topic modeling multiple times with each iteration having a different setting for the number of topics, ranging from 3 to 50 topics. 
+The final amount of topics is then determined by comparing the coherence scores per setting and selecting the maximum. 
+For this task, we used the built-in function of the STTM framework \citep{qiang_short_2020}. 
+%% It builds on the PMI, calculating the likelihood of co-occurrence of words in a sliding 10-word window based on a dump of the German Wikipedia.\footnote{\url{https://dumps.wikimedia.org/dewiki/20211020/dewiki-20211020-pages-meta-current.xml.bz2}} 
+
+Figure \textit{\ref{fig:coherence_scores}} shows the identified coherence scores for both LDA and GPU-PDMM on our data set. The maximum coherence score in our example was 0.3566 using GPU-PDMM and \var{number_of_topics} topics, and was therefore used. We see, in general, that GPU-PDMM performs better on our data set, looking at the coherence scores. With a high number of topics, the topics get so fine-grained that the differences are not that large any more. 
+Running the topic modeling on this corpus and optimizing topic coherence scores, we find \var{number_of_topics} topics as the best in our case. For the full list of all identified topics and its related top 20 words, we can refer to our repository. 
+% Table \textit{\ref{table:identified_topics}}. 
+
+\begin{figure}[tb]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/topic_coherence_graph.png}
+    \caption{Coherence scores}
+    \label{fig:coherence_scores}
+\end{figure}
+
+
+%\subsubsection
+\textbf{Document-Topic Assignment. }
+%
+To analyze the topic diversity of headlines, we need an assignment of a topic for a headline. We introduce a notation for this headline-topic assignment:
+$t(h): Headline \rightarrow Topic$. For instance, the topic of headline $h_1$ would be: $t(h_1) = t_5$.
+
+After preprocessing our headlines, we use the transformed headlines from Section \ref{subsec:data_preprocessing} as an input for our topic modeling. 
+%Figure \textit{\ref{fig:document_topic_assigment_example}} shows such an exemplary preprocessing.
+
+%\begin{figure}[tb]
+%    \centering
+%    \includegraphics[width=0.8\textwidth]{images/document-topic-assigment-example.png}
+%    \caption{Example of original and preprocessed headline}
+%    \label{fig:document_topic_assigment_example}
+%\end{figure}
+
+%\begin{minipage}{\textwidth}
+
+    The used STTM framework then provides different outputs in the form of 
+    \begin{itemize}
+        \item \textbf{document-to-topic distributions}: Each headline has a probability distribution over all topics. $t(h)$ is then the topic with the highest probability. If two topics have the same probability, $t(h)$ is the topic with the lower index. 
+        
+        \item \textbf{topic assignment}: Each word in the headline is connected to one topic. $t(h)$ is the topic appearing the most. If two topics occur the same number of times, we define $t(h)$ as the topic with the lower index. 
+    \end{itemize}
+
+%    \vspace{2mm} 
+%\end{minipage}
+
+
+
+\subsection{Measuring Topic Diversity} %  of the Data Set
+\label{subsec:methodology_data_set_diversity}
+
+In this section we discuss how the dimensions variety, balance and disparity apply on the level of the whole data set. Section \ref{subsec:methodology_result_set_diversity} then discusses how these dimensions apply to the result sets of the searches. Whilst Section \ref{subsec:methodology_data_set_diversity} and \ref{subsec:methodology_result_set_diversity} discuss these applications in theory, Section \ref{sec:results} applies this to the Google Top Stories federal election data set.
+
+\subsubsection{Variety} %  of the Data Set
+\label{subsec:methodology_data_set_diversity_variety}
+Variety gives information about how many categories occur \citep{macarthur_patterns_1965}, in our case counting all unique topics. 
+As the topic model takes the number of topics as an input and then outputs exactly this amount of topics, the variety is exactly the number of topics in topic modeling. As one can create the value of variety ``manually'', looking at variety would only make sense comparing subsets of the data set. 
+One could, for instance, investigate in the number of topics per search query. 
+Another example will be discussed in Section \ref{subsec:methodology_result_set_diversity}, looking into the structure and diversity of result sets (which then of course could also be aggregated again into result set diversity per query or query category).
+
+\subsubsection{Balance} %  of the Data Set
+\label{subsec:methodology_data_set_diversity_balance}
+The balance of the overall topics of the data set would be how many headlines are assigned to each topic. How a distribution should look in order to be considered diverse in terms of balance differs according to the underlying normative frameworks.
+We argue that in the deliberative normative framework, this would be a uniform distribution or at least a distribution similar to it \citep{loecherbach_unified_2020}. Thus, every topic has the same or at least a similar amount of assigned headlines. Consequently, all viewpoints, entities and in this case topics, should be represented equally in the news debate.
+
+To bring the theoretical concept of balance into a measurable variable, we use 
+Shannon's Evenness index (SEI) \citep{loecherbach_unified_2020}. 
+% SEI. 
+Originating from diversity of biotopes in biology, SEI has found broad adaption in different research disciplines \citep{van_dam_diversity_2019}. 
+The SEI of a result set $X$ is calculated by dividing the Shannon Diversity Index (SDI) of $X$ by its maximum:
+% \footnote{\url{https://en.wikipedia.org/wiki/Species_evenness}}
+
+\[SEI(X) = \frac{SDI}{max(SDI)} = \frac{SDI}{ln(|X|)} = \frac{-\sum_{i}^{|X|}(p_i * ln(p_i))}{ln(|X|)} \in [0,1]\]
+
+with $p_i$ being the proportion of articles that belongs to the topic currently iterated over. The higher the SEI value, the more uniform a distribution is.
+
+
+\subsubsection{Disparity} %  of the Data Set
+\label{subsec:methodology_data_set_diversity_disparity}
+
+In contrast to variety and balance where it is only important that different topics are distinct, disparity measures how similar and therefore also different the topics are semantically. 
+
+Our approach is as follows: We use the generated top words from topic modeling to calculate a numerical representation of each topic. For each top word, we get the word embedding of a representation. The average of all top word embeddings then represents the embedding for the overall topic. To get the similarity between different topics, we use the cosine-similarities between every topic. The correlation between these two sizes is $Disparity = 1 - Similarity$. A similarity value of 1 means that the two topics are identical, and lower weights meaning less similarity. The other way around, a disparity value of 0 means that the two topics are identical and higher values meaning higher disparity. 
+These values could be represented by “disparity weights” on weighted edges of a complete graph $G = (V, E)$ with $V = t_0, ..., t_n$ and $E = \{\{t_i, t_j\}: 0 \leq i \leq j \leq n\}$ the respective weights $w: E \rightarrow \mathbb{R}$. Figure \textit{\ref{subfig:disparity_weighted_graph_disparity}} illustrates this in an example.
+
+% This approach also opens the field for potential further research and quantification, using some more data for distinguishing the topics (e.g., using knowledge graphs).
+
+\begin{figure}[tb]
+    \centering
+    \begin{subfigure}{.3\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/disparity_example_weighted_graph_disparity.png}
+        \caption{Example disparity graph}
+        \label{subfig:disparity_weighted_graph_disparity}
+    \end{subfigure}
+    \begin{subfigure}{.3\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/disparity_example_weighted_graph_similarity.png}
+        \caption{Corresponding similarity graph}
+        \label{subfig:disparity_weighted_graph_similarity}
+    \end{subfigure}
+    \caption{Relationship between disparity and similarity graph}
+    \label{fig:disparity_weighted_graph}
+\end{figure}
+
+Disparity for the full data set would mean looking into how distinct and different from each other the identified topics are. Motivated on a simple example, this would, for instance, mean that the two topics ``football'' and ``finance'' have a higher disparity (=lower similarity) than for example ``football'' and ``athletes''. By quantifying these ``distances'', one can better understand how similar or different two search results are by comparing all the topics against each other.
+
+
+% Theory for d
+% Methods for 
+\subsection{Determining Topic Diversity of Result Sets}
+\label{subsec:methodology_result_set_diversity}
+
+The following section discusses the same dimensions as in Section \ref{subsec:methodology_data_set_diversity}, but now on the level of result sets. For the Section \ref{sec:results}, the respective values are calculated for each result set and then aggregated into one overview.
+
+\subsubsection{Variety of Result Sets} In the following let $V(X)$ denote the variety of a result set $X$. The basic intuition behind variety is ``the more, the better''. In the case of topic diversity, that would be: The more topics covered by a result set, the better. 
+
+Limited only through the overall data set variety (i.e., not considering the number of results), the following applies to the variety $V$ of a result set $S$:
+\[
+    0 \leq V(S) \leq \var{number_of_topics} \text{ with } V(S) \in \mathbb{N}_0\text{.}
+\]
+
+
+% As we only consider one topic per headline, determining the variety is rather straightforward. 
+To determine the variety of a result set, one has to count all unique topics. 
+As each result set has a maximum of 10 results in our case and each result has exactly one topic, the variety of this result set is exactly the number of unique topics. Considering only one topic per headline and the maximum amount of 10 results per result set, we can restrict above condition further to
+\[
+    0 \leq V(S) \leq 10 \text{ with } V(S) \in \mathbb{N}_0\text{.}
+\]
+A variety of 10 would mean that every result in the result set has a different topic.
+
+In the example in Figure \textit{\ref{fig:variety_absolute_topic_difference}}, result set $A$ is – only related to variety – more diverse than $B$, as it has 3 instead of only 2 unique topics. 
+That might be unintuitive at first glance, as result set $B$ has more results than $A$.
+
+\begin{figure}[tb]
+    \centering
+    \includegraphics[width=\textwidth]{images/variety_absolute_topic_difference.png}
+    
+   % \begin{table}[tb]
+    %    \centering
+        \begin{tabularx}{\textwidth}{XXXl}
+        \toprule 
+        & \textbf{Result set $A$} & \textbf{Result set $B$} & \textbf{Diversity} \\
+        \midrule
+        \textbf{Absolute topics} & $|\{t_1, t_2, t_3\}| = 3$ & $|\{t_1, t_2\}| = 2$ & $V(A)=3 > V(B)=2$ \\
+        \bottomrule
+        \end{tabularx}
+    %\end{table}
+    
+    \caption{Simple example for variety with one topic}
+    \label{fig:variety_absolute_topic_difference}
+\end{figure}
+
+Variety in itself is not sufficient to determine diversity, although it is often used as such. The approach of using variety as a measure for diversity is often used on source diversity, where researchers argue that higher source variety (so the more news sources) the better the diversity. This has been critiqued by multiple researchers (e.g., \citet{carpenter_study_2010,napoli_deconstructing_1999}).
+
+
+\subsubsection{Balance of Result Sets}
+
+Building on variety, which only take into account the absolute number of topics, balance now looks at how the topics are distributed across the headlines. 
+In most cases, a result set would be considered diverse, if the distribution of the topics are somehow equal or even (discrete uniform distribution). 
+An extreme example with a low diversity would be a result set with 10 results, of which 8 are about the same topic and the other both another one. This could be considered having a low balance. 
+
+
+Coming back to the example in Figure \textit{\ref{fig:variety_absolute_topic_difference}}, we would have the distribution illustrated in Figure \textit{\ref{subfig:balance_example_actual}}, although a more even distribution like Figure \textit{\ref{subfig:balance_example_optimal}} would be preferred.
+
+\begin{figure}[tb]
+    \centering
+    \begin{subfigure}{\textwidth}
+        \centering
+        \includegraphics[width=0.55\textwidth]{images/balance_example_visual.png}
+        \caption{Alternative visualization of result set B in Figure \ref{fig:variety_absolute_topic_difference}}
+        \label{subfig:balance_example_visual}
+    \end{subfigure}
+    \begin{subfigure}{.3\textwidth}
+        \centering
+        \includegraphics[width=0.6\textwidth]{images/balance_example_actual.png}
+        \caption{Actual balance}
+        \label{subfig:balance_example_actual}
+    \end{subfigure}
+    \begin{subfigure}{.3\textwidth}
+        \centering
+        \includegraphics[width=0.6\textwidth]{images/balance_example_optimal.png}
+        \caption{Optimal balance}
+        \label{subfig:balance_example_optimal}
+    \end{subfigure}
+    \begin{subfigure}{.3\textwidth}
+        \centering
+        \includegraphics[width=0.6\textwidth]{images/balance_example_optimal_2.png}
+        \caption{Alt. optimal balance}
+        \label{subfig:balance_example_optimal_2}
+    \end{subfigure}
+    \caption{Example for balance}
+    \label{fig:balance_example}
+\end{figure}
+
+
+The goal is to have a complete even distribution, where every topic occurs equally, so exactly the same number of times. To translate these distributions in a explicit measurement, we use Shannon's Evenness index (SEI) \citep{loecherbach_unified_2020}. SEI $\in [0,1]$, where a value of 1 corresponds to an optimal balance.
+
+
+
+
+\subsubsection{Disparity of Result Sets}
+
+Let $D(X)$ denote the disparity of a result set $X$ and $t(h)$ the topic of headline $h$. Then $D(h_i, h_j) = w((t(h_i), t(h_j))) = w((t(h_j), t(h_i)))$ denotes the disparity between the headlines $h_i$ and $h_j$. When summing up all pairwise disparities between all topics of headlines in a result set and dividing it by the amount of pairs, we receive the disparity for a result set. Therefore, we aim for a minimum normalized pairwise sum.
+
+We propose the following way to calculate disparity of a result set $X$:
+
+\[D(X) = \frac{\sum_{i}^{}\sum_{j}^{} D(h_i, h_j)}{\binom{n}{2}}; \quad \forall i<j \leq n\]
+
+\begin{figure}[tb]
+    \centering
+    \begin{subfigure}{.3\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/disparity_example_weighted_graph_disparity.png}
+        \caption{Disparity values as weighted graph}
+        \label{subfig:disparity_weighted_graph}
+    \end{subfigure}
+    \begin{subfigure}{.3\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/disparity_resultset_example.png}
+        \caption{Example result set}
+        \label{subfig:disparity_resultset_example}
+    \end{subfigure}
+
+    \caption{Example for disparity}
+    \label{fig:disparity_example}
+\end{figure}
+
+Following this calculation, the disparity of result set $B$ from the example in Figure \textit{\ref{fig:disparity_example}} would be 0.18.

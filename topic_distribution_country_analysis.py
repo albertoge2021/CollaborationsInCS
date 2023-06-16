@@ -1,4 +1,5 @@
 import warnings
+
 warnings.simplefilter(action="ignore", category=FutureWarning)
 import pandas as pd
 from matplotlib import pyplot as plt
