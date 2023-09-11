@@ -28,7 +28,7 @@ selected_countries = ["US", "CN", "EU"]
 colors = ["deepskyblue", "limegreen", "orangered", "mediumpurple"]
 Path("paper_results/").mkdir(parents=True, exist_ok=True)
 
-us_collaborations = 0
+"""us_collaborations = 0
 eu_collaborations = 0
 cn_collaborations = 0
 us_collaborations_total = 0
@@ -138,6 +138,7 @@ plt.legend(
 )
 
 # Show the plot
+plt.title("All publications")
 plt.savefig(f"paper_results/bar_country_collaboration_cn_us_eu.png")
 plt.close()
 
@@ -335,6 +336,7 @@ plt.legend(
 )
 
 # Show the plot
+plt.title("All publications")
 plt.savefig(f"paper_results/bar_country_collaboration_citations_cn_us_eu.png")
 plt.close()
 
@@ -508,6 +510,13 @@ for collaboration_type in unique_collaboration_types:
     )
 
     # Show the plot
+    if collaboration_type == "education":
+        name = "Education-only"
+    elif collaboration_type == "company":
+        name = "Company-only"
+    else:
+        name = "Education and Company"
+    plt.title(name + " publications")
     plt.savefig(
         f"paper_results/bar_country_collaboration_cn_us_eu_type_{collaboration_type}.png"
     )
@@ -666,10 +675,17 @@ for collaboration_type in unique_collaboration_types:
     )
 
     # Show the plot
+    if collaboration_type == "education":
+        name = "Education-only"
+    elif collaboration_type == "company":
+        name = "Company-only"
+    else:
+        name = "Education and Company"
+    plt.title(name + " publications")
     plt.savefig(
         f"paper_results/bar_country_collaboration_citations_cn_us_eu_type_{collaboration_type}.png"
     )
-    plt.close()
+    plt.close()"""
 
 us_ratio_total = []
 eu_ratio_total = []
@@ -965,7 +981,11 @@ plt.title("Participation ratio - Citations")
 plt.savefig(f"paper_results/scatter_ratio_citations_by_countries.png")
 plt.close()
 
-
+df.boxplot(by="country", column=["citations"], grid=False)
+plt.title("Average number of citations by Region")
+plt.savefig(f"paper_results/boxplot_citations_by_countries.png")
+plt.close()
+"""
 collaborations = []
 
 for row in tqdm(eu_df.itertuples()):
@@ -1134,3 +1154,4 @@ for relation in unique_relation_types:
     plt.title("10 most common topics by year for " + relation)
     plt.savefig(f"paper_results/line_topics_by_year_{relation}.png")
     plt.close()
+"""

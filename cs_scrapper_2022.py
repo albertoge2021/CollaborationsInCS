@@ -5,6 +5,7 @@ from urllib3.exceptions import MaxRetryError
 from selenium.webdriver.common.by import By
 import aiohttp
 from diophila import OpenAlex
+from geopy.distance import geodesic as GD
 from selenium.common.exceptions import WebDriverException, NoSuchElementException
 import json
 from selenium import webdriver
@@ -15,38 +16,10 @@ openalex = OpenAlex()
 warnings.simplefilter(action="ignore", category=FutureWarning)
 import pandas as pd
 
-eu_countries = [
-    "AT",
-    "BE",
-    "BG",
-    "HR",
-    "CY",
-    "CZ",
-    "DK",
-    "EE",
-    "FI",
-    "FR",
-    "DE",
-    "GR",
-    "HU",
-    "IE",
-    "IT",
-    "LV",
-    "LT",
-    "LU",
-    "MT",
-    "NL",
-    "PL",
-    "PT",
-    "RO",
-    "SK",
-    "SI",
-    "ES",
-    "SE",
-]
+CSV_FILE_PATH = "cs_dataset.csv"
 
 
-async def get_work(work):
+async def get_work(work, session):
     df = pd.DataFrame(
         {
             "work": str,
@@ -55,28 +28,51 @@ async def get_work(work):
             "concepts": [],
             "type": str,
             "countries": [],
+            "locations": [],
+            "max_distance": float,
+            "avg_distance": float,
         }
     )
-    if work["doi"] == None:
+    if work["doi"] is None:
         return
+
     citations = work["cited_by_count"] if work["cited_by_count"] else 0
     auth_type_list = []
     country_list = []
+    ubication_list = []
+    coordinates = []
+
     for authorship in work["authorships"]:
         for institution in authorship["institutions"]:
             if not "country_code" in institution:
                 return
             else:
-                country_code = (
-                    institution["country_code"]
-                    if institution["country_code"] not in eu_countries
-                    else "EU"
-                )
-                country_list.append(country_code)
+                country_list.append(institution["country_code"])
             if not institution["type"]:
                 return
             else:
                 auth_type_list.append(institution["type"])
+            if "ror" in institution and institution["ror"]:
+                async with session.get(
+                    "http://localhost:9292/organizations/"
+                    + institution["ror"].rsplit("/", 1)[1]
+                ) as resp:
+                    req = await resp.json()
+                    coordinates.append(
+                        (req["addresses"][0]["lat"], req["addresses"][0]["lng"])
+                    )
+                    ubication_list.append(
+                        {
+                            "name": req["name"],
+                            "type": req["types"][0],
+                            "city": req["addresses"][0]["city"],
+                            "country": req["country"]["country_code"],
+                            "lat": req["addresses"][0]["lat"],
+                            "lng": req["addresses"][0]["lng"],
+                        }
+                    )
+            else:
+                return
     if len(auth_type_list) < 2:
         return
     if all(item == "company" for item in auth_type_list):
@@ -87,6 +83,13 @@ async def get_work(work):
         paper_type = "mixed"
     else:
         return
+    distances = []
+    for i in range(len(coordinates)):
+        for j in range(i + 1, len(coordinates)):
+            coord1 = coordinates[i]
+            coord2 = coordinates[j]
+            distances.append(GD(coord1, coord2).km)
+    avg_distance = sum(distances) / len(distances)
     df = df.append(
         pd.Series(
             [
@@ -96,12 +99,15 @@ async def get_work(work):
                 [concept["display_name"] for concept in work["concepts"]],
                 paper_type,
                 country_list,
+                ubication_list,
+                max(distances),
+                avg_distance,
             ],
             index=df.columns,
         ),
         ignore_index=True,
     )
-    df.to_csv("cs_final.csv", mode="a", index=False, header=False)
+    df.to_csv(CSV_FILE_PATH, mode="a", index=False, header=False)
 
 
 async def main():
@@ -117,50 +123,44 @@ async def main():
             "concepts": [],
             "type": str,
             "countries": [],
+            "locations": [],
+            "max_distance": float,
+            "avg_distance": float,
         }
     )
-    # header.to_csv("cs_final.csv")
-
+    # header.to_csv(CSV_FILE_PATH)
     options = Options()
-    options.add_argument("--headless")
 
-    # Create a webdriver using the ChromeOptions object
     driver = webdriver.Chrome(options=options)
 
-    # Create a webdriver using the ChromeOptions object
-    try:
-        driver = webdriver.Chrome(options=options)
-    except WebDriverException as e:
-        print("Error creating Chrome webdriver:", e)
-        exit()
+    next_cursor = "IlszLCAzLCAnaHR0cHM6Ly9vcGVuYWxleC5vcmcvVzMxMjg3NTM5ODInXSI="
+    async with aiohttp.ClientSession(
+        connector=aiohttp.TCPConnector(ssl=False)
+    ) as session:
+        for page_num in range(1, 225000):
+            url = f"https://api.openalex.org/works?filter=concept.id:C41008148,publication_year:%3E1989,publication_year:%3C2022,cited_by_count:%3E0,is_retracted:False,type:journal-article&sort=cited_by_count:desc&per-page=200&cursor={next_cursor}"
+            driver.get(url)
 
-    # Loop through the pages
-    next_cursor = "*"
-    for page_num in range(1, 215000):
-        print(page_num)
-        # Build the URL for the page
-        url = f"https://api.openalex.org/works?filter=concept.id:C41008148,publication_year:2022,is_retracted:False,type:journal-article&sort=cited_by_count:desc&per-page=200&cursor={next_cursor}"
-        driver.get(url)
+            try:
+                content = driver.find_element(By.TAG_NAME, "pre").text
+            except NoSuchElementException:
+                print("Error finding JSON data on page:", url)
+                continue
+            try:
+                parsed_json = json.loads(content)
+            except:
+                print("Error parsing JSON data from page:", url)
+                continue
+            next_cursor = parsed_json["meta"]["next_cursor"]
+            if "results" in parsed_json:
+                for result in parsed_json["results"]:
+                    await get_work(result, session)
+            else:
+                print("error" + str(next_cursor))
 
-        # Get the JSON data from the page source
-        try:
-            content = driver.find_element(By.TAG_NAME, "pre").text
-        except NoSuchElementException:
-            print("Error finding JSON data on page:", url)
-            continue
-        try:
-            parsed_json = json.loads(content)
-        except:
-            print("Error parsing JSON data from page:", url)
-            continue
-        next_cursor = parsed_json["meta"]["next_cursor"]
-        if "results" in parsed_json:
-            for result in parsed_json["results"]:
-                await get_work(result)
-        else:
-            print("error")
-
-    driver.quit()
+            print(str(page_num) + " - " + next_cursor)
+            with open("paper_results_2/cursor.txt", "a") as file:
+                file.write(f"{next_cursor}\n")
 
 
 asyncio.run(main())

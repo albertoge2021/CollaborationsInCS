@@ -1,0 +1,4 @@
+Relation	Mean HDI
+CN	0.87
+EU	0.83
+US	0.84

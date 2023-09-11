@@ -101,7 +101,7 @@ async def get_work(work):
         ),
         ignore_index=True,
     )
-    df.to_csv("cs_final.csv", mode="a", index=False, header=False)
+    df.to_csv("test.csv", mode="a", index=False, header=False)
 
 
 async def main():
@@ -119,7 +119,7 @@ async def main():
             "countries": [],
         }
     )
-    # header.to_csv("cs_final.csv")
+    header.to_csv("test.csv")
 
     options = Options()
     options.add_argument("--headless")
@@ -135,7 +135,7 @@ async def main():
         exit()
 
     # Loop through the pages
-    next_cursor = "*"
+    next_cursor = "IlswLCAwLCAnaHR0cHM6Ly9vcGVuYWxleC5vcmcvVzMwMQnXSI="
     for page_num in range(1, 215000):
         print(next_cursor)
         # Build the URL for the page
