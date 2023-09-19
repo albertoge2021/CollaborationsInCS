@@ -1,4 +1,8 @@
-Relation	Mean HDI
-CN	0.87
-EU	0.83
-US	0.84
+Average Total Collaborations by HDI Group:
+HdiGroup
+Low             60.115172
+Medium         133.914367
+High           395.689506
+Very High"    1456.361446
+Pearson Correlation Coefficient: 0.26 - P-Value: 0.00000
+Spearman Correlation Coefficient: 0.64 - P-Value: 0.00000
