@@ -1,0 +1,24 @@
+Hemisphere Counts:
+            citations    year  concepts    type  countries  max_distance  avg_distance  has_no_dev_country
+hemisphere                                                                                                
+M              149268  149268    149268  149268     149268        149268        149268              149268
+N              757376  757376    757376  757376     757376        757376        757376              757376
+S                7255    7255      7255    7255       7255          7255          7255                7255
+
+Average Citations by Hemisphere:
+hemisphere
+M    32.941675
+N    34.606910
+S    24.647416
+
+Median Citations by Hemisphere:
+hemisphere
+M    12.0
+N    13.0
+S     9.0
+
+Kruskal Test between Hemispheres:
+T-statistic: 530.8409468352048
+P-value: 5.362323498645158e-116
+
+Statistically significant differences exist between the groups.

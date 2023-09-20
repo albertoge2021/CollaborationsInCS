@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 import pycountry
 import pycountry_convert as pc
+from scipy.stats import chi2_contingency
 import scipy.stats as stats
 import seaborn as sns
 import warnings
@@ -29,7 +30,7 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 # https://towardsdatascience.com/what-are-the-commonly-used-statistical-tests-in-data-science-a95cfc2e6b5e
 
 # Setup Data
-df = pd.read_csv("cs_dataset_final.csv")
+"""df = pd.read_csv("cs_dataset_final.csv")
 eng_df = pd.read_csv("english_level.csv")
 df = df[df["year"] > 1989]
 df = df[df["year"] < 2022]
@@ -42,7 +43,7 @@ df = df_filtered.drop("num_items", axis=1)
 unique_collaboration_types = df["type"].unique()
 selected_countries = ["US", "CN", "EU"]
 colors = ["deepskyblue", "limegreen", "orangered", "mediumpurple"]
-Path("paper_results_2/").mkdir(parents=True, exist_ok=True)
+Path("paper_results_2/").mkdir(parents=True, exist_ok=True)"""
 EU_COUNTRIES = [
     "AT",
     "BE",
@@ -308,10 +309,9 @@ dev_df_gropued = pd.DataFrame(
         "has_no_dev_country"
     ],
 )
-print(dev_df_gropued.groupby("hemisphere").count())
 dev_df_gropued.to_csv("dev_df_north_south.csv", index=False)"""
 
-total_collaborations = defaultdict(dict)
+"""total_collaborations = defaultdict(dict)
 
 for row in tqdm(df.itertuples(), total=len(df), desc="Counting Countries"):
     country_list = literal_eval(row.countries)
@@ -622,4 +622,77 @@ for relation in df_concepts["has_no_dev_country"].unique():
     plt.ylabel("Number of collaborations")
     plt.title("10 most common topics by year for " + name)
     plt.savefig(f"paper_results_2/line_topics_by_year_{name}.png")
-    plt.close()
+    plt.close()"""
+
+# Load your data
+dev_df_north_south = pd.read_csv("dev_df_north_south.csv")
+
+# Group by 'hemisphere' column and count the number of entries in each group
+grouped = dev_df_north_south.groupby("hemisphere").count()
+
+# Calculate average and median citations for each group
+avg_citations = dev_df_north_south.groupby("hemisphere")["citations"].mean()
+median_citations = dev_df_north_south.groupby("hemisphere")["citations"].median()
+
+# Perform Kruskal-Wallis test
+h_statistic, p_value = stats.kruskal(*[group["citations"] for _, group in dev_df_north_south.groupby("hemisphere")])
+
+# Open the file in append mode and write the results
+with open("paper_results_2/emisphere_results.txt", "w") as file:
+    file.write("Hemisphere Counts:\n")
+    file.write(grouped.to_string() + "\n\n")
+    
+    file.write("Average Citations by Hemisphere:\n")
+    file.write(avg_citations.to_string() + "\n\n")
+    
+    file.write("Median Citations by Hemisphere:\n")
+    file.write(median_citations.to_string() + "\n\n")
+    
+    file.write(f"Kruskal Test between Hemispheres:\n")
+    file.write(f"T-statistic: {h_statistic}\n")
+    file.write(f"P-value: {p_value}\n\n")
+    
+    if p_value < 0.05:  # You can set your significance level here
+        file.write("Statistically significant differences exist between the groups.\n")
+    else:
+        file.write("No statistically significant differences exist between the groups.\n")
+
+# Group the DataFrame by 'hemisphere' and count the number of rows in each group
+hemisphere_counts = dev_df_north_south['hemisphere'].value_counts()
+
+# Specify custom legend names
+custom_legend_names = ["Northern Hemisphere", "Southern Hemisphere", "Both Hemispheres"]
+
+# Create a pie plot
+plt.figure(figsize=(8, 8))
+plt.pie(hemisphere_counts, labels=hemisphere_counts.index, autopct='%1.1f%%', startangle=140)
+plt.title("Number of Rows by Hemisphere")
+plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+# Add a legend with custom names
+plt.legend(custom_legend_names, loc="upper right")
+
+plt.savefig(f"paper_results_2/pie_chart_papers_by_hemisphere.png")
+plt.close()
+
+unique_hemisphere_types = dev_df_north_south["hemisphere"].unique()
+
+for hemis in unique_hemisphere_types: 
+    sub_df_southern = dev_df_north_south[dev_df_north_south['hemisphere'] == hemis]
+
+    # Extract the "countries" column as a list of lists
+    countries_lists = sub_df_southern["countries"]
+
+    # Flatten the list of lists into a single list of countries
+    all_countries = [country for countries_list in countries_lists for country in literal_eval(countries_list)]
+
+    # Use Counter to count the occurrences of each country
+    country_counts = Counter(all_countries)
+
+    # Sort the country counts in descending order by count
+    sorted_country_counts = dict(sorted(country_counts.items(), key=lambda x: x[1], reverse=True))
+
+    # Print the sorted counts for each country
+    with open(f"paper_results_2/emisphere_count_{hemis}.txt", "w") as file:
+        for country, count in sorted_country_counts.items():
+            file.write(f"{country}: {count}\n")
