@@ -140,7 +140,7 @@ collaborators_to_remove = [
 # TODO Citations rates of both groups, also by type
 # TODO Average distance between the collaborations
 
-#region maps
+# region maps
 
 collaborators = []
 
@@ -221,9 +221,7 @@ for origin in participation_df["origin"].unique():
     elif origin == "CHN":
         origin_name = "China"
     ax.set_title(f"Number of collaborations with {origin_name}")
-    plt.savefig(
-        f"paper_results_2/map_number_of_collaborations_{origin}.png"
-    )
+    plt.savefig(f"paper_results_2/map_number_of_collaborations_{origin}.png")
     plt.close()
 
 merged_df = world_map.merge(
@@ -242,9 +240,7 @@ merged_df[merged_df["iso_a3"].isin(collaborators_to_remove)].plot(
     color="mediumpurple", ax=ax
 )
 ax.set_title(f"Number of collaborations")
-plt.savefig(
-    f"paper_results_2/map_number_of_collaborations.png"
-)
+plt.savefig(f"paper_results_2/map_number_of_collaborations.png")
 plt.close()
 
 grouped_df = (
@@ -267,7 +263,8 @@ for origin in participation_df["origin"].unique():
         ax=ax,
         edgecolor="0.8",
         legend=True,
-        vmin=0, vmax=40
+        vmin=0,
+        vmax=40,
     )
     merged_df[merged_df["iso_a3"].isin(collaborators_to_remove)].plot(
         color="mediumpurple", ax=ax
@@ -280,9 +277,7 @@ for origin in participation_df["origin"].unique():
         origin_name = "China"
         legend_label = "Percentage of Collaborations"
     ax.set_title(f"Percentage of collaborations with {origin_name}")
-    plt.savefig(
-        f"paper_results_2/map_percentage_of_collaborations_{origin}.png"
-    )
+    plt.savefig(f"paper_results_2/map_percentage_of_collaborations_{origin}.png")
     plt.close()
 
 grouped_df["percentage"] = grouped_df["frequency"] / total_occurrences[origin] * 100
@@ -297,18 +292,17 @@ merged_df.plot(
     ax=ax,
     edgecolor="0.8",
     legend=True,
-    vmin=0, vmax=40
+    vmin=0,
+    vmax=40,
 )
 merged_df[merged_df["iso_a3"].isin(collaborators_to_remove)].plot(
     color="mediumpurple", ax=ax
 )
 ax.set_title(f"Percentage of collaborations")
-plt.savefig(
-    f"paper_results_2/map_percentage_of_collaborations.png"
-)
+plt.savefig(f"paper_results_2/map_percentage_of_collaborations.png")
 plt.close()
 
-#endregion
+# endregion
 
 collaborations = {
     "US": {},

@@ -140,7 +140,7 @@ collaborators_to_remove = [
 # TODO Citations rates of both groups, also by type
 # TODO Average distance between the collaborations
 
-#region preliminary_analysis
+# region preliminary_analysis
 
 countries_ratio = []
 countries_df = []
@@ -160,33 +160,35 @@ for row in tqdm(df.itertuples()):
     if all(code in updated_list for code in ["EU", "CN", "US"]):
         continue
     if any(code in updated_list for code in ["EU", "CN", "US"]):
-        relation =  "EU-US-CN"
+        relation = "EU-US-CN"
     else:
         relation = "Other countries"
     countries_ratio.append(
+        (
+            citations,
+            row.type,
+            row.year,
+            relation,
+            row.max_distance,
+            row.avg_distance,
+        )
+    )
+
+    updated_list = [
+        country for country in updated_list if country not in countries_to_remove
+    ]
+    for country in updated_list:
+        countries_df.append(
             (
                 citations,
                 row.type,
                 row.year,
                 relation,
+                country,
                 row.max_distance,
                 row.avg_distance,
             )
         )
-    
-    updated_list = [country for country in updated_list if country not in countries_to_remove]
-    for country in updated_list:
-        countries_df.append(
-                (
-                    citations,
-                    row.type,
-                    row.year,
-                    relation,
-                    country,
-                    row.max_distance,
-                    row.avg_distance,
-                )
-            )
 
 countries_df = pd.DataFrame(
     countries_df,
@@ -213,18 +215,24 @@ ratio_df = pd.DataFrame(
     ],
 )
 
-relation_country_occurrences = countries_df.groupby(['relation', 'country']).size().reset_index(name='occurrences')
-relation_country_occurrences = relation_country_occurrences.sort_values(by=['relation', 'occurrences'], ascending=[True, False])
-unique_relations = relation_country_occurrences['relation'].unique()
+relation_country_occurrences = (
+    countries_df.groupby(["relation", "country"]).size().reset_index(name="occurrences")
+)
+relation_country_occurrences = relation_country_occurrences.sort_values(
+    by=["relation", "occurrences"], ascending=[True, False]
+)
+unique_relations = relation_country_occurrences["relation"].unique()
 
 for relation in unique_relations:
-    relation_data = relation_country_occurrences[relation_country_occurrences['relation'] == relation].head(10)
-    
+    relation_data = relation_country_occurrences[
+        relation_country_occurrences["relation"] == relation
+    ].head(10)
+
     plt.figure(figsize=(10, 6))
-    plt.bar(relation_data['country'], relation_data['occurrences'])
-    plt.xlabel('Country')
-    plt.ylabel('Number of Occurrences')
-    plt.title(f'Top 10 Most Repeated Countries for Relation: {relation}')
+    plt.bar(relation_data["country"], relation_data["occurrences"])
+    plt.xlabel("Country")
+    plt.ylabel("Number of Occurrences")
+    plt.title(f"Top 10 Most Repeated Countries for Relation: {relation}")
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.savefig(f"paper_results_2/barplot_most_collaborators_{relation}.png")
@@ -239,58 +247,62 @@ plt.tight_layout()
 plt.savefig(f"paper_results_2/lineplot_collaborations_per_year_per_country.png")
 plt.close()
 
-relation_counts = ratio_df['relation'].value_counts()
-relation_counts.plot(kind='bar')
-plt.title('Number of papers per Group of Countries')
-plt.xlabel('Group of Countries')
-plt.ylabel('Number of papers')
+relation_counts = ratio_df["relation"].value_counts()
+relation_counts.plot(kind="bar")
+plt.title("Number of papers per Group of Countries")
+plt.xlabel("Group of Countries")
+plt.ylabel("Number of papers")
 plt.tight_layout()
 plt.savefig(f"paper_results_2/barplot_collaborations_per_country_group.png")
 plt.close()
 
-relation_counts = ratio_df.groupby(['type'])['relation'].value_counts()
-relation_counts.plot(kind='bar')
-plt.title('Number of papers per Group of Countries per type')
-plt.xlabel('Group of Countries')
-plt.ylabel('Number of papers')
-plt.legend(title='Type')
+relation_counts = ratio_df.groupby(["type"])["relation"].value_counts()
+relation_counts.plot(kind="bar")
+plt.title("Number of papers per Group of Countries per type")
+plt.xlabel("Group of Countries")
+plt.ylabel("Number of papers")
+plt.legend(title="Type")
 plt.tight_layout()
 plt.savefig(f"paper_results_2/barplot_publications_per_country_group_per_type.png")
 plt.close()
 
-avg_citations_per_country_group = ratio_df.groupby('relation')['citations'].mean()
-avg_citations_per_country_group.plot(kind='bar')
-plt.title('Average Citations per Group of Countries')
-plt.xlabel('Group of Countries')
-plt.ylabel('Average Citations')
+avg_citations_per_country_group = ratio_df.groupby("relation")["citations"].mean()
+avg_citations_per_country_group.plot(kind="bar")
+plt.title("Average Citations per Group of Countries")
+plt.xlabel("Group of Countries")
+plt.ylabel("Average Citations")
 plt.tight_layout()
 plt.savefig(f"paper_results_2/barplot_avg_citations_per_country_group.png")
 plt.close()
 
-max_distance_per_country_group = ratio_df.groupby('relation')['max_distance'].mean()
-max_distance_per_country_group.plot(kind='bar')
-plt.title('Average Max Distance per Group of Countries')
-plt.xlabel('Group of Countries')
-plt.ylabel('Average Max Distance')
+max_distance_per_country_group = ratio_df.groupby("relation")["max_distance"].mean()
+max_distance_per_country_group.plot(kind="bar")
+plt.title("Average Max Distance per Group of Countries")
+plt.xlabel("Group of Countries")
+plt.ylabel("Average Max Distance")
 plt.tight_layout()
 plt.savefig(f"paper_results_2/barplot_max_distance_per_country_group.png")
 plt.close()
 
-avg_distance_per_country_group = ratio_df.groupby('relation')['avg_distance'].mean()
-avg_distance_per_country_group.plot(kind='bar')
-plt.title('Average Mean Distance per Group of Countries')
-plt.xlabel('Group of Countries')
-plt.ylabel('Average Mean Distance')
+avg_distance_per_country_group = ratio_df.groupby("relation")["avg_distance"].mean()
+avg_distance_per_country_group.plot(kind="bar")
+plt.title("Average Mean Distance per Group of Countries")
+plt.xlabel("Group of Countries")
+plt.ylabel("Average Mean Distance")
 plt.tight_layout()
 plt.savefig(f"paper_results_2/barplot_avg_distance_per_country_group.png")
 plt.close()
 
-avg_citations_per_type_relation = ratio_df.groupby(['type', 'relation'])['citations'].mean().reset_index()
-sns.barplot(x='relation', y='citations', hue='type', data=avg_citations_per_type_relation)
-plt.title('Average Citations per Group of Countries by Type')
-plt.xlabel('Group of Countries')
-plt.ylabel('Average Citations')
-plt.legend(title='Type')
+avg_citations_per_type_relation = (
+    ratio_df.groupby(["type", "relation"])["citations"].mean().reset_index()
+)
+sns.barplot(
+    x="relation", y="citations", hue="type", data=avg_citations_per_type_relation
+)
+plt.title("Average Citations per Group of Countries by Type")
+plt.xlabel("Group of Countries")
+plt.ylabel("Average Citations")
+plt.legend(title="Type")
 plt.tight_layout()
 plt.savefig(f"paper_results_2/barplot_avg_distance_per_country_group_per_type.png")
 plt.close()
@@ -311,19 +323,19 @@ for row in tqdm(df.itertuples()):
     if all(code in updated_list for code in ["EU", "CN", "US"]):
         continue
     elif any(code in updated_list for code in ["EU", "CN", "US"]):
-        relation =  "-".join(code for code in ["EU", "CN", "US"] if code in updated_list)
+        relation = "-".join(code for code in ["EU", "CN", "US"] if code in updated_list)
     else:
         relation = "Other countries"
     countries_ratio.append(
-            (
-                citations,
-                row.type,
-                row.year,
-                relation,
-                row.max_distance,
-                row.avg_distance,
-            )
+        (
+            citations,
+            row.type,
+            row.year,
+            relation,
+            row.max_distance,
+            row.avg_distance,
         )
+    )
 
 ratio_df = pd.DataFrame(
     countries_ratio,
@@ -360,15 +372,15 @@ for row in tqdm(df.itertuples()):
     citations = int(row.citations)
     for country in updated_list:
         countries_ratio.append(
-                (
-                    citations,
-                    row.type,
-                    row.year,
-                    country,
-                    row.max_distance,
-                    row.avg_distance,
-                )
+            (
+                citations,
+                row.type,
+                row.year,
+                country,
+                row.max_distance,
+                row.avg_distance,
             )
+        )
 
 ratio_df = pd.DataFrame(
     countries_ratio,
@@ -383,10 +395,7 @@ ratio_df = pd.DataFrame(
 )
 
 value_counts = (
-    ratio_df["country"]
-    .value_counts()
-    .rename_axis("country")
-    .reset_index(name="count")
+    ratio_df["country"].value_counts().rename_axis("country").reset_index(name="count")
 )
 
 # Sort the DataFrame by count in descending order
@@ -401,77 +410,85 @@ plt.title("Top 10 Values with the Most Publications")
 plt.savefig(f"paper_results_2/bar_collaborations_by_country_top_10.png")
 plt.close()
 
-country_counts = (
-    ratio_df.groupby(["year", "country"]).size().reset_index(name="count")
-)
+country_counts = ratio_df.groupby(["year", "country"]).size().reset_index(name="count")
 
 # Plotting the bar plot for the top 15 values
-country_year_counts = value_counts[~value_counts['country'].isin(selected_countries)]
+country_year_counts = value_counts[~value_counts["country"].isin(selected_countries)]
 top_values = country_year_counts.head(10)
 top_values.plot(kind="bar", x="country", y="count", figsize=(10, 6))
 plt.xlabel("Country")
 plt.ylabel("Publications")
 plt.title("Top 10 Values with the Most Publications (Without CN, EU, US)")
-plt.savefig(f"paper_results_2/bar_collaborations_by_country_top_10_without_eu_cn_us.png")
+plt.savefig(
+    f"paper_results_2/bar_collaborations_by_country_top_10_without_eu_cn_us.png"
+)
 plt.close()
 
-country_counts = (
+country_counts = ratio_df.groupby(["year", "country"]).size().reset_index(name="count")
+
+# Counting the number of occurrences per year per country
+country_year_counts = (
     ratio_df.groupby(["year", "country"]).size().reset_index(name="count")
 )
 
-# Counting the number of occurrences per year per country
-country_year_counts = ratio_df.groupby(['year', 'country']).size().reset_index(name='count')
-
 # Excluding specific countries (CN, EU, US)
-excluded_countries = ['CN', 'EU', 'US']
-country_year_counts = country_year_counts[~country_year_counts['country'].isin(excluded_countries)]
+excluded_countries = ["CN", "EU", "US"]
+country_year_counts = country_year_counts[
+    ~country_year_counts["country"].isin(excluded_countries)
+]
 
 # Finding the top 10 countries overall in time
-top_countries = country_year_counts.groupby('country')['count'].sum().nlargest(10).index
+top_countries = country_year_counts.groupby("country")["count"].sum().nlargest(10).index
 
 # Filtering the data to include only the top 10 countries
-top_countries_data = country_year_counts[country_year_counts['country'].isin(top_countries)]
+top_countries_data = country_year_counts[
+    country_year_counts["country"].isin(top_countries)
+]
 
 # Plotting the data using seaborn
-sns.lineplot(x='year', y='count', hue='country', data=top_countries_data)
-plt.title('Number of Occurrences per Year per Country (Top 10, Excluding CN, EU, US)')
-plt.xlabel('Year')
-plt.ylabel('Number of Occurrences')
-plt.legend(title='Country')
+sns.lineplot(x="year", y="count", hue="country", data=top_countries_data)
+plt.title("Number of Occurrences per Year per Country (Top 10, Excluding CN, EU, US)")
+plt.xlabel("Year")
+plt.ylabel("Number of Occurrences")
+plt.legend(title="Country")
 plt.tight_layout()
-plt.savefig(f"paper_results_2/lineplot_papers_per_year_per_country_without_eu_us_cn.png")
+plt.savefig(
+    f"paper_results_2/lineplot_papers_per_year_per_country_without_eu_us_cn.png"
+)
 plt.close()
 
 # Grouping the data by 'country' and calculating the average of 'citations'
-country_avg_citations = ratio_df.groupby('country')['citations'].mean().reset_index()
+country_avg_citations = ratio_df.groupby("country")["citations"].mean().reset_index()
 
 # Finding the top 10 countries with highest average citations
-top_avg_citations_countries = country_avg_citations.nlargest(10, 'citations')
+top_avg_citations_countries = country_avg_citations.nlargest(10, "citations")
 
 # Plotting the data using seaborn
-sns.barplot(y='citations', x='country', data=top_avg_citations_countries)
-plt.title('Top 10 Countries with Highest Average Citations')
-plt.xlabel('Average Citations')
-plt.ylabel('Country')
+sns.barplot(y="citations", x="country", data=top_avg_citations_countries)
+plt.title("Top 10 Countries with Highest Average Citations")
+plt.xlabel("Average Citations")
+plt.ylabel("Country")
 plt.tight_layout()
 plt.savefig(f"paper_results_2/barplot_citation_per_country.png")
 plt.close()
 
 # Grouping the data by 'country' and calculating the average of 'citations'
-country_avg_citations = ratio_df.groupby('country')['citations'].mean().reset_index()
+country_avg_citations = ratio_df.groupby("country")["citations"].mean().reset_index()
 
 # Excluding specific countries (CN, EU, US)
-excluded_countries = ['CN', 'EU', 'US']
-country_avg_citations = country_avg_citations[~country_avg_citations['country'].isin(excluded_countries)]
+excluded_countries = ["CN", "EU", "US"]
+country_avg_citations = country_avg_citations[
+    ~country_avg_citations["country"].isin(excluded_countries)
+]
 
 # Finding the top 10 countries with highest average citations
-top_avg_citations_countries = country_avg_citations.nlargest(10, 'citations')
+top_avg_citations_countries = country_avg_citations.nlargest(10, "citations")
 
 # Plotting the data using seaborn
-sns.barplot(y='citations', x='country', data=top_avg_citations_countries)
-plt.title('Top 10 Countries with Highest Average Citations (Excluding CN, EU, US)')
-plt.xlabel('Average Citations')
-plt.ylabel('Country')
+sns.barplot(y="citations", x="country", data=top_avg_citations_countries)
+plt.title("Top 10 Countries with Highest Average Citations (Excluding CN, EU, US)")
+plt.xlabel("Average Citations")
+plt.ylabel("Country")
 plt.tight_layout()
 plt.savefig(f"paper_results_2/barplot_citation_per_country_without_eu_us_cn.png")
 plt.close()
@@ -488,13 +505,13 @@ for row in tqdm(df.itertuples()):
         country = "EU" if country in EU_COUNTRIES else country
         countries_ratio.append(country)
 
-#TODO porcentage de colaboracion nacional entre los dos grupos
-#TODO porcentage de colaboracion grupal entre los dos grupos
-#TODO porcentage de colaboracion internacional entre los dos grupos
+# TODO porcentage de colaboracion nacional entre los dos grupos
+# TODO porcentage de colaboracion grupal entre los dos grupos
+# TODO porcentage de colaboracion internacional entre los dos grupos
 
-#endregion
+# endregion
 
-#region maps
+# region maps
 
 collaborators = []
 
@@ -578,9 +595,7 @@ for origin in participation_df["origin"].unique():
     elif origin == "CHN":
         origin_name = "China"
     ax.set_title(f"Number of collaborations with {origin_name}")
-    plt.savefig(
-        f"paper_results_2/map_number_of_collaborations_{origin}.png"
-    )
+    plt.savefig(f"paper_results_2/map_number_of_collaborations_{origin}.png")
     plt.close()
 
 merged_df = world_map.merge(
@@ -599,9 +614,7 @@ merged_df[merged_df["iso_a3"].isin(collaborators_to_remove)].plot(
     color="mediumpurple", ax=ax
 )
 ax.set_title(f"Number of collaborations")
-plt.savefig(
-    f"paper_results_2/map_number_of_collaborations.png"
-)
+plt.savefig(f"paper_results_2/map_number_of_collaborations.png")
 plt.close()
 
 grouped_df = (
@@ -624,7 +637,8 @@ for origin in participation_df["origin"].unique():
         ax=ax,
         edgecolor="0.8",
         legend=True,
-        vmin=0, vmax=40
+        vmin=0,
+        vmax=40,
     )
     merged_df[merged_df["iso_a3"].isin(collaborators_to_remove)].plot(
         color="mediumpurple", ax=ax
@@ -637,9 +651,7 @@ for origin in participation_df["origin"].unique():
         origin_name = "China"
         legend_label = "Percentage of Collaborations"
     ax.set_title(f"Percentage of collaborations with {origin_name}")
-    plt.savefig(
-        f"paper_results_2/map_percentage_of_collaborations_{origin}.png"
-    )
+    plt.savefig(f"paper_results_2/map_percentage_of_collaborations_{origin}.png")
     plt.close()
 
 grouped_df["percentage"] = grouped_df["frequency"] / total_occurrences[origin] * 100
@@ -654,18 +666,17 @@ merged_df.plot(
     ax=ax,
     edgecolor="0.8",
     legend=True,
-    vmin=0, vmax=40
+    vmin=0,
+    vmax=40,
 )
 merged_df[merged_df["iso_a3"].isin(collaborators_to_remove)].plot(
     color="mediumpurple", ax=ax
 )
 ax.set_title(f"Percentage of collaborations")
-plt.savefig(
-    f"paper_results_2/map_percentage_of_collaborations.png"
-)
+plt.savefig(f"paper_results_2/map_percentage_of_collaborations.png")
 plt.close()
 
-#endregion
+# endregion
 
 new_df = []
 dev_df = pd.read_csv("human_dev_standard.csv")
@@ -676,36 +687,35 @@ for row in dev_df.itertuples():
     code_2 = row.Code_2
     year = row.Year
     index = row.Hdi
-    
+
     # If the code_2 key doesn't exist in the dictionary, create it
     if code_2 not in result_dict:
         result_dict[code_2] = {}
-    
+
     # Add the year and index to the inner dictionary
     result_dict[code_2][year] = index
 
 # Create a mapping for code replacement
-country_mapping = {
-    "XK": "RS",
-    **{country: "EU" for country in EU_COUNTRIES}
-}
+country_mapping = {"XK": "RS", **{country: "EU" for country in EU_COUNTRIES}}
 
 for row in tqdm(df.itertuples()):
     country_list = set(literal_eval(row.countries))
     if len(set(country_list)) < 1:
         continue
-    
+
     # Replace codes and create an updated country list
     updated_list = [country_mapping.get(country, country) for country in country_list]
-    
+
     # Check if all target codes are in the updated list
     if set(selected_countries).issubset(updated_list):
         continue
-    
+
     citations = int(row.citations)
-    
+
     for country in updated_list:
-        hdi = result_dict.get(country, {}).get(row.year, None)  # Get HDI from the dictionary
+        hdi = result_dict.get(country, {}).get(
+            row.year, None
+        )  # Get HDI from the dictionary
         if any(code == "EU" for code in updated_list):
             new_df.append(
                 (
@@ -716,7 +726,7 @@ for row in tqdm(df.itertuples()):
                     country,
                     row.max_distance,
                     row.avg_distance,
-                    hdi
+                    hdi,
                 )
             )
         if any(code == "US" for code in updated_list):
@@ -729,7 +739,7 @@ for row in tqdm(df.itertuples()):
                     country,
                     row.max_distance,
                     row.avg_distance,
-                    hdi
+                    hdi,
                 )
             )
         if any(code == "CN" for code in updated_list):
@@ -742,7 +752,7 @@ for row in tqdm(df.itertuples()):
                     country,
                     row.max_distance,
                     row.avg_distance,
-                    hdi
+                    hdi,
                 )
             )
 
@@ -756,29 +766,45 @@ new_df = pd.DataFrame(
         "country",
         "max_distance",
         "avg_distance",
-        "hdi"
+        "hdi",
     ],
 )
 
-new_df = new_df[~new_df['country'].isin(selected_countries)]
+new_df = new_df[~new_df["country"].isin(selected_countries)]
 
 # Group by 'relation' and 'country', calculate mean citations, and sort
-grouped_citations = new_df.groupby(['relation', 'country'])['citations'].mean().reset_index()
-grouped_citations = grouped_citations.sort_values(by=['relation', 'citations'], ascending=[True, False])
+grouped_citations = (
+    new_df.groupby(["relation", "country"])["citations"].mean().reset_index()
+)
+grouped_citations = grouped_citations.sort_values(
+    by=["relation", "citations"], ascending=[True, False]
+)
 
 # Group by 'relation' and 'country', calculate the count of rows, and sort
-grouped_collaborations = new_df.groupby(['relation', 'country']).size().reset_index(name='row_count')
-grouped_collaborations = grouped_collaborations.sort_values(by=['relation', 'row_count'], ascending=[True, False])
+grouped_collaborations = (
+    new_df.groupby(["relation", "country"]).size().reset_index(name="row_count")
+)
+grouped_collaborations = grouped_collaborations.sort_values(
+    by=["relation", "row_count"], ascending=[True, False]
+)
 
 # Group by 'relation' and 'country', calculate the highest avg_distance, and sort
-grouped_avg_distance = new_df.groupby(['relation', 'country'])['avg_distance'].max().reset_index()
-grouped_avg_distance = grouped_avg_distance.sort_values(by=['relation', 'avg_distance'], ascending=[True, False])
+grouped_avg_distance = (
+    new_df.groupby(["relation", "country"])["avg_distance"].max().reset_index()
+)
+grouped_avg_distance = grouped_avg_distance.sort_values(
+    by=["relation", "avg_distance"], ascending=[True, False]
+)
 
 # Group by 'relation' and 'country', calculate the highest max_distance, and sort
-grouped_max_distance = new_df.groupby(['relation', 'country'])['max_distance'].max().reset_index()
-grouped_max_distance = grouped_max_distance.sort_values(by=['relation', 'max_distance'], ascending=[True, False])
+grouped_max_distance = (
+    new_df.groupby(["relation", "country"])["max_distance"].max().reset_index()
+)
+grouped_max_distance = grouped_max_distance.sort_values(
+    by=["relation", "max_distance"], ascending=[True, False]
+)
 
-unique_relations = grouped_citations['relation'].unique()
+unique_relations = grouped_citations["relation"].unique()
 
 sns.lmplot(
     x="hdi",
@@ -786,25 +812,25 @@ sns.lmplot(
     data=new_df,
     scatter=False,
 )
-plt.xlabel('HDI')
-plt.ylabel('Citations')
-plt.title('Relationship between HDI and Citations')
+plt.xlabel("HDI")
+plt.ylabel("Citations")
+plt.title("Relationship between HDI and Citations")
 plt.tight_layout()
-plt.savefig('paper_results_2/scatter_general_hdi_citations.png')
+plt.savefig("paper_results_2/scatter_general_hdi_citations.png")
 plt.close()
 
 for relation in unique_relations:
     # Filter data for the current relation based on top_countries
     top_countries_data = grouped_citations[
-        (grouped_citations['relation'] == relation)
+        (grouped_citations["relation"] == relation)
     ].head(10)
-    
+
     # Citations
     plt.figure(figsize=(10, 6))
-    plt.bar(top_countries_data['country'], top_countries_data['citations'])
-    plt.xlabel('Country')
-    plt.ylabel('Average Citations')
-    plt.title(f'Top 10 Countries with Highest Avg Citations for Relation: {relation}')
+    plt.bar(top_countries_data["country"], top_countries_data["citations"])
+    plt.xlabel("Country")
+    plt.ylabel("Average Citations")
+    plt.title(f"Top 10 Countries with Highest Avg Citations for Relation: {relation}")
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.savefig(f"paper_results_2/barplot_avg_citations_by_country_{relation}.png")
@@ -812,14 +838,14 @@ for relation in unique_relations:
 
     # Collaborations
     top_countries_data = grouped_collaborations[
-        (grouped_collaborations['relation'] == relation)
+        (grouped_collaborations["relation"] == relation)
     ].head(10)
-    
+
     plt.figure(figsize=(10, 6))
-    plt.bar(top_countries_data['country'], top_countries_data['row_count'])
-    plt.xlabel('Country')
-    plt.ylabel('Total Collaborations')
-    plt.title(f'Top 10 Countries by Number of Collaborations for Relation: {relation}')
+    plt.bar(top_countries_data["country"], top_countries_data["row_count"])
+    plt.xlabel("Country")
+    plt.ylabel("Total Collaborations")
+    plt.title(f"Top 10 Countries by Number of Collaborations for Relation: {relation}")
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.savefig(f"paper_results_2/barplot_collaborations_by_country_{relation}.png")
@@ -827,14 +853,14 @@ for relation in unique_relations:
 
     # Avg Distance
     top_countries_data = grouped_avg_distance[
-        (grouped_avg_distance['relation'] == relation)
+        (grouped_avg_distance["relation"] == relation)
     ].head(10)
-    
+
     plt.figure(figsize=(10, 6))
-    plt.bar(top_countries_data['country'], top_countries_data['avg_distance'])
-    plt.xlabel('Country')
-    plt.ylabel('Average Distance')
-    plt.title(f'Top 10 Countries with Highest Avg Distance for Relation: {relation}')
+    plt.bar(top_countries_data["country"], top_countries_data["avg_distance"])
+    plt.xlabel("Country")
+    plt.ylabel("Average Distance")
+    plt.title(f"Top 10 Countries with Highest Avg Distance for Relation: {relation}")
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.savefig(f"paper_results_2/barplot_avg_distance_by_country_{relation}.png")
@@ -842,21 +868,21 @@ for relation in unique_relations:
 
     # Max Distance
     top_countries_data = grouped_max_distance[
-        (grouped_max_distance['relation'] == relation)
+        (grouped_max_distance["relation"] == relation)
     ].head(10)
-    
+
     plt.figure(figsize=(10, 6))
-    plt.bar(top_countries_data['country'], top_countries_data['max_distance'])
-    plt.xlabel('Country')
-    plt.ylabel('Max Distance')
-    plt.title(f'Top 10 Countries with Highest Max Distance for Relation: {relation}')
+    plt.bar(top_countries_data["country"], top_countries_data["max_distance"])
+    plt.xlabel("Country")
+    plt.ylabel("Max Distance")
+    plt.title(f"Top 10 Countries with Highest Max Distance for Relation: {relation}")
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.savefig(f"paper_results_2/barplot_max_distance_by_country_{relation}.png")
     plt.close()
 
-    relation_data = new_df[new_df['relation'] == relation]
-    
+    relation_data = new_df[new_df["relation"] == relation]
+
     plt.figure(figsize=(10, 6))
     sns.lmplot(
         x="hdi",
@@ -864,34 +890,35 @@ for relation in unique_relations:
         data=relation_data,
         scatter=False,
     )
-    plt.xlabel('HDI')
-    plt.ylabel('Citations')
-    plt.title(f'Relationship between HDI and Citations for Relation: {relation}')
+    plt.xlabel("HDI")
+    plt.ylabel("Citations")
+    plt.title(f"Relationship between HDI and Citations for Relation: {relation}")
     plt.tight_layout()
-    plt.savefig(f'paper_results_2/scatter_hdi_citations_{relation}.png')
+    plt.savefig(f"paper_results_2/scatter_hdi_citations_{relation}.png")
     plt.close()
 
-grouped_distances = new_df.groupby('relation')['avg_distance', 'max_distance', 'hdi'].mean()
+grouped_distances = new_df.groupby("relation")[
+    "avg_distance", "max_distance", "hdi"
+].mean()
 
 # Create a text file to write the results
-with open('paper_results_2/distance_results.txt', 'w') as file:
+with open("paper_results_2/distance_results.txt", "w") as file:
     file.write("Relation\tMean Avg Distance\tMean Max Distance\n")
-    
+
     for relation, row in grouped_distances.iterrows():
-        mean_avg_distance = row['avg_distance']
-        mean_max_distance = row['max_distance']
-        
+        mean_avg_distance = row["avg_distance"]
+        mean_max_distance = row["max_distance"]
+
         file.write(f"{relation}\t{mean_avg_distance:.2f}\t{mean_max_distance:.2f}\n")
 
 # Create a text file to write the HDI results
-with open('paper_results_2/hdi_results.txt', 'w') as file:
+with open("paper_results_2/hdi_results.txt", "w") as file:
     file.write("Relation\tMean HDI\n")
-    
-    for relation, row in grouped_distances.iterrows():
-        mean_hdi = row['hdi']
-        
-        file.write(f"{relation}\t{mean_hdi:.2f}\n")
 
+    for relation, row in grouped_distances.iterrows():
+        mean_hdi = row["hdi"]
+
+        file.write(f"{relation}\t{mean_hdi:.2f}\n")
 
 
 collaborations = {
@@ -1087,23 +1114,23 @@ for row in tqdm(df.itertuples()):
     country_list = set(literal_eval(row.countries))
     if len(set(country_list)) < 1:
         continue
-    
+
     # Replace codes and create an updated country list
     updated_list = [country_mapping.get(country, country) for country in country_list]
     if any(selected_country in updated_list for selected_country in selected_countries):
         for country in updated_list:
             new_df.append(
-                    (
-                        citations,
-                        row.type,
-                        row.year,
-                        country,
-                        row.max_distance,
-                        row.avg_distance,
-                        hdi
-                    )
+                (
+                    citations,
+                    row.type,
+                    row.year,
+                    country,
+                    row.max_distance,
+                    row.avg_distance,
+                    hdi,
                 )
-            
+            )
+
 new_df = pd.DataFrame(
     new_df,
     columns=[
@@ -1113,18 +1140,18 @@ new_df = pd.DataFrame(
         "country",
         "max_distance",
         "avg_distance",
-        "hdi"
+        "hdi",
     ],
 )
 
-country_occurrences = new_df['country'].value_counts().head(10)
+country_occurrences = new_df["country"].value_counts().head(10)
 
 # Plot the top ten countries with the most occurrences
 plt.figure(figsize=(10, 6))
-country_occurrences.plot(kind='bar')
-plt.xlabel('Country')
-plt.ylabel('Number of Collaborations')
-plt.title('Top Ten Countries with the Most Collaborations with CN, EU, US')
+country_occurrences.plot(kind="bar")
+plt.xlabel("Country")
+plt.ylabel("Number of Collaborations")
+plt.title("Top Ten Countries with the Most Collaborations with CN, EU, US")
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.savefig(f"paper_results_2/bar_plot_most_collaborations_with_cn_eu_us.png")

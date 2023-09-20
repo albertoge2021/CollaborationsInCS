@@ -1,28 +1,25 @@
 from ast import literal_eval
 from collections import Counter, defaultdict
-import csv
+from itertools import combinations
 from matplotlib import patches
+from matplotlib.colors import Normalize
+from pathlib import Path
+from scipy.stats import pearsonr, spearmanr
+from scipy.stats import ttest_ind
+from sklearn.cluster import KMeans
+from tqdm import tqdm
+import geopandas as gpd
+from geopy.geocoders import Nominatim
+from pycountry_convert import country_alpha2_to_country_name
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
 import pandas as pd
-import warnings
+import pycountry
+import pycountry_convert as pc
 import scipy.stats as stats
 import seaborn as sns
-import matplotlib.pyplot as plt
-from tqdm import tqdm
-import numpy as np
-from pathlib import Path
-import geopandas as gpd
-import matplotlib.pyplot as plt
-from matplotlib.colors import Normalize
-import pycountry
-import pandas as pd
-import networkx as nx
-import matplotlib.pyplot as plt
-from itertools import combinations
-import pycountry_convert as pc
-from scipy.stats import pearsonr, spearmanr
-import pandas as pd
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
+import warnings
 
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
@@ -183,6 +180,8 @@ for row in tqdm(df.itertuples(), total=len(df), desc="Counting Countries"):
     country_list = literal_eval(row.countries)
     country_list = ["RS" if country == "XK" else "CN" if country == "TW" else country for country in country_list]
     country_list = list(set(country_list))
+    if country_list >= 1: 
+        continue
     year = row.year
     # Check if the condition is met for the current row
     condition_met = has_lower_hdi(year, country_list)
@@ -205,13 +204,124 @@ print(dev_df_gropued.groupby('has_no_dev_country').count())
 dev_df_gropued.to_csv("dev_df_gropued.csv", index=False)
 """
 
+"""hdi_dict = {}
+
+# Populate the hdi_dict
+for row in dev_df.itertuples():
+    year = row.Year
+    code = row.Code
+    hdi = row.Hdi
+    if year not in hdi_dict:
+        hdi_dict[year] = {}
+    hdi_dict[year][code] = hdi
+
+def has_lower_hdi(year, country_list):
+    # Check if the year is in hdi_dict
+    if year in hdi_dict:
+        # Iterate through the country_list
+        for country_code in country_list:
+            # Check if there is a country with lower HDI
+            if country_code in hdi_dict[year] and hdi_dict[year][country_code] < 0.549:
+                return True
+    return False
+
+dev_list = []
+
+def convert_country_code_to_name(country_code):
+    try:
+        country_name = country_alpha2_to_country_name(country_code)
+        return country_name
+    except LookupError:
+        return None
+
+def get_hemisphere(country_code):
+    country_name = convert_country_code_to_name(country_code)
+
+    if country_name:
+        geolocator = Nominatim(user_agent="country_hemisphere_checker")
+        
+        # Get the capital city of the country
+        location = geolocator.geocode(country_name, exactly_one=True)
+        
+        if location:
+            latitude = location.latitude
+            return latitude
+
+for row in tqdm(df.itertuples(), total=len(df), desc="Counting Countries"):
+    country_list = literal_eval(row.countries)
+    country_list = [
+        "RS" if country == "XK" else "CN" if country == "TW" else country
+        for country in country_list
+    ]
+    country_list = list(set(country_list))
+    if len(country_list) <= 1:
+        continue
+    year = row.year
+    condition_met = has_lower_hdi(year, country_list)
+    has_no_dev_country = False
+    if condition_met:
+        has_no_dev_country = True
+    location_list = literal_eval(row.locations)
+    northern = False
+    southern = False
+    for location in location_list:
+        if location["lat"] is None:
+            latitude = get_hemisphere(location["country"])
+        else: 
+            latitude = location["lat"]
+        if latitude > 0:
+            northern = True
+        elif latitude < 0:
+            southern = True
+
+    if northern and southern:
+        hemisphere = "M"
+    elif northern:
+        hemisphere = "N"
+    elif southern:
+        hemisphere = "S"
+    dev_list.append(
+        (
+            row.citations,
+            row.year,
+            row.concepts,
+            row.type,
+            row.countries,
+            row.max_distance,
+            row.avg_distance,
+            hemisphere,
+            has_no_dev_country
+        )
+    )
+
+dev_df_gropued = pd.DataFrame(
+    dev_list,
+    columns=[
+        "citations",
+        "year",
+        "concepts",
+        "type",
+        "countries",
+        "max_distance",
+        "avg_distance",
+        "hemisphere",
+        "has_no_dev_country"
+    ],
+)
+print(dev_df_gropued.groupby("hemisphere").count())
+dev_df_gropued.to_csv("dev_df_north_south.csv", index=False)"""
 
 total_collaborations = defaultdict(dict)
 
 for row in tqdm(df.itertuples(), total=len(df), desc="Counting Countries"):
     country_list = literal_eval(row.countries)
-    country_list = ["RS" if country == "XK" else "CN" if country == "TW" else country for country in country_list]
+    country_list = [
+        "RS" if country == "XK" else "CN" if country == "TW" else country
+        for country in country_list
+    ]
     country_list = list(set(country_list))
+    if len(country_list) <= 1:
+        continue
 
     # Iterate through each combination of two countries in the current row
     for i in range(len(country_list)):
@@ -220,13 +330,20 @@ for row in tqdm(df.itertuples(), total=len(df), desc="Counting Countries"):
             # Exclude self-collaborations and handle None values
             if country1 is not None and country2 is not None and country1 != country2:
                 # Update total_collaborations for country1
-                total_collaborations[country1][country2] = total_collaborations[country1].get(country2, 0) + 1
+                total_collaborations[country1][country2] = (
+                    total_collaborations[country1].get(country2, 0) + 1
+                )
 
                 # Update total_collaborations for country2
-                total_collaborations[country2][country1] = total_collaborations[country2].get(country1, 0) + 1
+                total_collaborations[country2][country1] = (
+                    total_collaborations[country2].get(country1, 0) + 1
+                )
 
 # Sort the total_collaborations dictionary by keys and create a new sorted dictionary
-sorted_collaborations = {country: dict(sorted(collabs.items())) for country, collabs in total_collaborations.items()}
+sorted_collaborations = {
+    country: dict(sorted(collabs.items()))
+    for country, collabs in total_collaborations.items()
+}
 total_collaborations_by_country = defaultdict(int)
 
 # Iterate through the sorted_collaborations dictionary and accumulate the counts
@@ -236,10 +353,14 @@ for country, collaborations in sorted_collaborations.items():
 
 # Convert the defaultdict to a regular dictionary if needed
 total_collaborations_by_country = dict(total_collaborations_by_country)
-collaborations_df = pd.DataFrame(total_collaborations_by_country.items(), columns=["Country", "Collaborations"])
+collaborations_df = pd.DataFrame(
+    total_collaborations_by_country.items(), columns=["Country", "Collaborations"]
+)
 
 # Merge 'eng_df' and 'collaborations_df' by the "Country" column
-merged_df = pd.merge(eng_df[["Country", "Score"]], collaborations_df, on="Country", how="left")
+merged_df = pd.merge(
+    eng_df[["Country", "Score"]], collaborations_df, on="Country", how="left"
+)
 
 # Drop rows with missing or infinite values
 merged_df = merged_df.dropna()
@@ -260,10 +381,18 @@ plt.savefig(f"paper_results_2/correlation_number_papers_english_level.png")
 plt.close()
 
 corr_coeff, p_value = pearsonr(merged_df["Score"], merged_df["Collaborations"])
-corr_coeff_spear, p_value_spear = spearmanr(merged_df["Score"], merged_df["Collaborations"])
-with open('paper_results_2/enlgish_level_results.txt', 'w') as file:
-    file.write(f"Pearson Correlation Coefficient: {corr_coeff:.2f}" + " - P-Value: {p_value:.5f}")
-    file.write(f"Pearson Correlation Coefficient: {corr_coeff_spear:.2f}" + " - P-Value: {p_value_spear:.5f}")
+corr_coeff_spear, p_value_spear = spearmanr(
+    merged_df["Score"], merged_df["Collaborations"]
+)
+with open("paper_results_2/english_level_results.txt", "w") as file:
+    file.write(
+        f"Pearson Correlation Coefficient: {corr_coeff:.2f}"
+        + f" - P-Value: {p_value:.5f}\n"
+    )
+    file.write(
+        f"Spearman Correlation Coefficient: {corr_coeff_spear:.2f}"
+        + f" - P-Value: {p_value_spear:.5f}"
+    )
 
 collaborations_by_year_and_country = defaultdict(lambda: defaultdict(dict))
 
@@ -271,24 +400,38 @@ collaborations_by_year_and_country = defaultdict(lambda: defaultdict(dict))
 for row in tqdm(df.itertuples(), total=len(df), desc="Counting Countries"):
     year = row.year
     country_list = literal_eval(row.countries)
-    country_list = ["RS" if country == "XK" else "CN" if country == "TW" else country for country in country_list]
+    country_list = [
+        "RS" if country == "XK" else "CN" if country == "TW" else country
+        for country in country_list
+    ]
     country_list = list(set(country_list))
+    if len(country_list) <= 1:
+        continue
 
     # Iterate through each combination of two countries in the current row
     for i in range(len(country_list)):
         for j in range(i + 1, len(country_list)):
             country1, country2 = country_list[i], country_list[j]
-            
+
             # Exclude self-collaborations and handle None values
             if country1 is not None and country2 is not None and country1 != country2:
                 # Update collaborations_by_year_and_country for country1
-                collaborations_by_year_and_country[year][country1][country2] = collaborations_by_year_and_country[year][country1].get(country2, 0) + 1
+                collaborations_by_year_and_country[year][country1][country2] = (
+                    collaborations_by_year_and_country[year][country1].get(country2, 0)
+                    + 1
+                )
 
                 # Update collaborations_by_year_and_country for country2
-                collaborations_by_year_and_country[year][country2][country1] = collaborations_by_year_and_country[year][country2].get(country1, 0) + 1
+                collaborations_by_year_and_country[year][country2][country1] = (
+                    collaborations_by_year_and_country[year][country2].get(country1, 0)
+                    + 1
+                )
 
 # Convert the defaultdict to a regular dictionary if needed
-collaborations_by_year_and_country = {year: {country: dict(data) for country, data in data_dict.items()} for year, data_dict in collaborations_by_year_and_country.items()}
+collaborations_by_year_and_country = {
+    year: {country: dict(data) for country, data in data_dict.items()}
+    for year, data_dict in collaborations_by_year_and_country.items()
+}
 total_collaborations_by_year_and_country = defaultdict(lambda: defaultdict(int))
 
 # Iterate through collaborations_by_year_and_country to calculate total collaborations
@@ -298,57 +441,185 @@ for year, year_data in collaborations_by_year_and_country.items():
         total_collaborations_by_year_and_country[year][country1] = total_collaborations
 
 # Convert the defaultdict to a regular dictionary if needed
-total_collaborations_by_year_and_country = {year: dict(data) for year, data in total_collaborations_by_year_and_country.items()}
+total_collaborations_by_year_and_country = {
+    year: dict(data) for year, data in total_collaborations_by_year_and_country.items()
+}
 
 data_list = []
 for year, year_data in total_collaborations_by_year_and_country.items():
     for country, total_collaborations in year_data.items():
-        data_list.append({
-            'Year': year,
-            'Country': country,
-            'TotalCollaborations': total_collaborations
-        })
+        data_list.append(
+            {
+                "Year": year,
+                "Country": country,
+                "TotalCollaborations": total_collaborations,
+            }
+        )
 
 # Create a DataFrame from the list of dictionaries
 total_collaborations_df = pd.DataFrame(data_list)
 
-merged_data = pd.merge(total_collaborations_df, dev_df, left_on=['Year', 'Country'], right_on=['Year', 'Code'], how='left')
+merged_data = pd.merge(
+    total_collaborations_df,
+    dev_df,
+    left_on=["Year", "Country"],
+    right_on=["Year", "Code"],
+    how="left",
+)
 
 # Drop rows with missing values in the 'Hdi' column
-merged_data = merged_data.dropna(subset=['Hdi'])
+merged_data = merged_data.dropna(subset=["Hdi"])
 
 # 4. HDI Grouping
 # Create HDI groups
 bins = [0, 0.549, 0.699, 0.799, 1.0]
-labels = ['Low', 'Medium', 'High', 'Very High"']
-merged_data['HdiGroup'] = pd.cut(merged_data['Hdi'], bins=bins, labels=labels)
+labels = ["Low", "Medium", "High", 'Very High"']
+merged_data["HdiGroup"] = pd.cut(merged_data["Hdi"], bins=bins, labels=labels)
 
 # Calculate average total collaborations by HDI group
-average_collaborations_by_hdi = merged_data.groupby('HdiGroup')['TotalCollaborations'].mean()
-with open('paper_results_2/hdi_results.txt', 'a') as file:
+average_collaborations_by_hdi = merged_data.groupby("HdiGroup")[
+    "TotalCollaborations"
+].mean()
+with open("paper_results_2/hdi_results.txt", "a") as file:
     file.write("Average Total Collaborations by HDI Group:\n")
     file.write(average_collaborations_by_hdi.to_string())
     file.write("\n")
 
 corr_coeff, p_value = pearsonr(merged_data["Hdi"], merged_data["TotalCollaborations"])
-corr_coeff_spear, p_value_spear = spearmanr(merged_data["Hdi"], merged_data["TotalCollaborations"])
-with open('paper_results_2/hdi_results.txt', 'a') as file:
-    file.write(f"Pearson Correlation Coefficient: {corr_coeff:.2f}" + f" - P-Value: {p_value:.5f}\n")
-    file.write(f"Spearman Correlation Coefficient: {corr_coeff_spear:.2f}" + f" - P-Value: {p_value_spear:.5f}\n")
+corr_coeff_spear, p_value_spear = spearmanr(
+    merged_data["Hdi"], merged_data["TotalCollaborations"]
+)
+with open("paper_results_2/hdi_results.txt", "a") as file:
+    file.write(
+        f"Pearson Correlation Coefficient: {corr_coeff:.2f}"
+        + f" - P-Value: {p_value:.5f}\n"
+    )
+    file.write(
+        f"Spearman Correlation Coefficient: {corr_coeff_spear:.2f}"
+        + f" - P-Value: {p_value_spear:.5f}\n"
+    )
 
-"""dev_df_gropued = pd.read_csv("dev_df_gropued.csv")
-hdi_dict = {}
-
-# Populate the hdi_dict
-for row in dev_df.itertuples():
-    year = row.Year
-    code = row.Code
-    hdi = row.Hdi
-    if year not in hdi_dict:
-        hdi_dict[year] = {}
-    hdi_dict[year][code] = hdi"""
-# Plot topics by group 
+# Plot topics by group
 # Plot topics by group by year
 # average citations
 # correlation between the citations and average hdi
 # pie chart for topics
+
+dev_df_grouped = pd.read_csv("dev_df_gropued.csv")
+
+data = []
+data_country = []
+
+for row in tqdm(
+    dev_df_grouped.itertuples(), total=len(dev_df_grouped), desc="Counting Countries"
+):
+    year = row.year
+    country_list = literal_eval(row.countries)
+    country_list = [
+        "RS" if country == "XK" else "CN" if country == "TW" else country
+        for country in country_list
+    ]
+    country_list = list(set(country_list))
+    if not len(country_list) > 1:
+        continue
+    for concept in literal_eval(row.concepts):
+        data.append(
+            (
+                concept,
+                year,
+                row.citations,
+                row.type,
+                row.countries,
+                row.max_distance,
+                row.avg_distance,
+                row.has_no_dev_country,
+            )
+        )
+        # for country in country_list:
+        # data_country.append((concept, year, row.citations, row.type, country, row.max_distance, row.avg_distance, row.has_no_dev_country))
+
+df_concepts = pd.DataFrame(
+    data,
+    columns=[
+        "concept",
+        "year",
+        "citations",
+        "type",
+        "countries",
+        "max_distance",
+        "avg_distance",
+        "has_no_dev_country",
+    ],
+)
+# df_concepts_country = pd.DataFrame(data_country, columns=['concept', 'year', 'citations', 'type', 'country', 'max_distance', 'avg_distance', 'has_no_dev_country'])
+
+# Task 1: Calculate and save statistics
+grouped_stats = (
+    df_concepts.groupby("has_no_dev_country")
+    .agg(
+        {
+            "citations": ["mean", "median"],
+            "max_distance": ["mean", "median"],
+            "avg_distance": ["mean", "median"],
+        }
+    )
+    .reset_index()
+)
+
+grouped_stats.columns = [
+    "has_no_dev_country",
+    "Avg_Citations",
+    "Median_Citations",
+    "Avg_Max_Distance",
+    "Median_Max_Distance",
+    "Avg_Avg_Distance",
+    "Median_Avg_Distance",
+]
+
+grouped_stats.to_csv("paper_results_2/grouped_statistics_concepts.csv", index=False)
+
+group_1 = df_concepts[df_concepts["has_no_dev_country"] == True]
+group_2 = df_concepts[df_concepts["has_no_dev_country"] == False]
+
+# Perform a two-sample t-test for 'citations' between the two groups
+t_statistic, p_value = ttest_ind(
+    group_1["citations"], group_2["citations"], equal_var=False
+)
+
+with open("paper_results_2/hdi_results.txt", "a") as file:
+    file.write(f"T-Test results: {t_statistic:.2f}" + f" - P-Value: {p_value:.5f}\n")
+    alpha = 0.05
+    if p_value < alpha:
+        file.write(
+            "There is a statistically significant difference between the groups.\n"
+        )
+    else:
+        file.write(
+            "There is no statistically significant difference between the groups.\n"
+        )
+
+for relation in df_concepts["has_no_dev_country"].unique():
+    relation_df = df_concepts[df_concepts["has_no_dev_country"] == relation]
+    test = (
+        relation_df.groupby("concept")
+        .size()
+        .reset_index(name="count")
+        .sort_values(by=["count"], ascending=False)
+        .head(11)
+    )
+    test.drop(test[test["concept"] == "Computer science"].index, inplace=True)
+    new_df = relation_df.loc[relation_df["concept"].isin(test.concept.to_list())]
+    means_full = new_df.groupby(["concept", "year"]).size().reset_index(name="count")
+    sns.lineplot(
+        data=means_full, x="year", y="count", hue="concept", markers=True, sort=True
+    )
+    if relation == False:
+        name = "Developed"
+    else:
+        name = "Non-Developed"
+    plt.xlabel("Year")
+    plt.legend(title="Concept")
+    plt.ylabel("Number of collaborations")
+    plt.title("10 most common topics by year for " + name)
+    plt.savefig(f"paper_results_2/line_topics_by_year_{name}.png")
+    plt.close()
