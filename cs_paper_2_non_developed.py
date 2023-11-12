@@ -1,6 +1,7 @@
 from ast import literal_eval
 from collections import Counter, defaultdict
 from itertools import combinations
+import json
 from matplotlib import patches
 from matplotlib.colors import Normalize
 from pathlib import Path
@@ -14,6 +15,7 @@ from pycountry_convert import country_alpha2_to_country_name
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
+import squarify
 import pandas as pd
 import pycountry
 import pycountry_convert as pc
@@ -311,7 +313,7 @@ dev_df_gropued = pd.DataFrame(
 )
 dev_df_gropued.to_csv("dev_df_north_south.csv", index=False)"""
 
-total_collaborations = defaultdict(dict)
+"""total_collaborations = defaultdict(dict)
 
 for row in tqdm(df.itertuples(), total=len(df), desc="Counting Countries"):
     country_list = literal_eval(row.countries)
@@ -344,6 +346,38 @@ sorted_collaborations = {
     country: dict(sorted(collabs.items()))
     for country, collabs in total_collaborations.items()
 }
+with open('sorted_collaborations.json', 'w') as json_file:
+    json.dump(sorted_collaborations, json_file)"""
+
+with open('sorted_collaborations.json', 'r') as json_file:
+    sorted_collaborations = json.load(json_file)
+threshold_percentage = 1  # You can adjust this threshold as needed
+
+for collaborator, collaborations in sorted_collaborations.items():
+    collabs = []
+    no_collabs = []
+
+    total_collaborations = sum(collaborations.values())
+    
+    for country, no_collaborations in collaborations.items():
+        percentage = (no_collaborations / total_collaborations) * 100
+        if percentage >= threshold_percentage:
+            collabs.append(pc.country_name_to_country_alpha3(pc.country_alpha2_to_country_name(country)))
+            no_collabs.append(no_collaborations)
+
+    # Check if there are collaborations below the threshold
+    if total_collaborations - sum(no_collabs) > 0:
+        collabs.append('Others')
+        no_collabs.append(total_collaborations - sum(no_collabs))
+
+    country_df = pd.DataFrame({'collaborations': no_collabs, 'country': collabs})
+
+    # plot it
+    squarify.plot(sizes=country_df['collaborations'], label=country_df['country'], alpha=.8,text_kwargs={'fontsize': 8, 'wrap': True})
+    plt.title(f"Collaborations of {pc.country_alpha2_to_country_name(collaborator)}")
+    plt.axis('off')
+    plt.savefig(f"paper_results_2/tree_maps/{collaborator}_treemap.png")
+    plt.close()
 total_collaborations_by_country = defaultdict(int)
 
 # Iterate through the sorted_collaborations dictionary and accumulate the counts
@@ -367,7 +401,6 @@ merged_df = merged_df.dropna()
 merged_df = merged_df.replace([np.inf, -np.inf], np.nan).dropna()
 
 # Create a scatter plot to visualize the relationship between Score and Collaborations
-plt.figure(figsize=(10, 6))
 sns.lmplot(
     x="Score",
     y="Collaborations",
@@ -471,26 +504,26 @@ merged_data = pd.merge(
 merged_data = merged_data.dropna(subset=["Hdi"])
 
 
-plt.figure(figsize=(10, 6))
-plt.scatter(df['Hdi'], df['TotalCollaborations'], alpha=0.5)
+plt.scatter(merged_data['Hdi'], merged_data['TotalCollaborations'], alpha=0.5)
 plt.title('Total Collaborations vs. HDI')
 plt.xlabel('HDI')
 plt.ylabel('Total Collaborations')
 plt.grid(True)
-plt.show()
+plt.savefig(f"paper_results_2/scatter_hdi_publications.png")
+plt.close()
 
 # Select the features for clustering
-X = df[['Hdi', 'TotalCollaborations']]
+X = merged_data[['Hdi', 'TotalCollaborations']]
 
 # Define the number of clusters (you can adjust this)
 k = 3
 kmeans = KMeans(n_clusters=k)
-df['Cluster'] = kmeans.fit_predict(X)
+merged_data['Cluster'] = kmeans.fit_predict(X)
 
 # Plot the clustered data
 plt.figure(figsize=(10, 6))
 for i in range(k):
-    cluster_data = df[df['Cluster'] == i]
+    cluster_data = merged_data[merged_data['Cluster'] == i]
     plt.scatter(cluster_data['Hdi'], cluster_data['TotalCollaborations'], label=f'Cluster {i}')
     
 plt.title('Total Collaborations vs. HDI (Clustered)')
@@ -498,18 +531,20 @@ plt.xlabel('HDI')
 plt.ylabel('Total Collaborations')
 plt.legend()
 plt.grid(True)
-plt.show()
+plt.savefig(f"paper_results_2/scatter_hdi_publications_cluster.png")
+plt.close()
 
 threshold = 0.8  # Adjust this value to your threshold of interest
 plt.figure(figsize=(10, 6))
-plt.scatter(df['Hdi'], df['TotalCollaborations'], alpha=0.5)
+plt.scatter(merged_data['Hdi'], merged_data['TotalCollaborations'], alpha=0.5)
 plt.axvline(x=threshold, color='r', linestyle='--', label=f'HDI Threshold ({threshold})')
 plt.title('Total Collaborations vs. HDI')
 plt.xlabel('HDI')
 plt.ylabel('Total Collaborations')
 plt.legend()
 plt.grid(True)
-plt.show()
+plt.savefig(f"paper_results_2/scatter_hdi_publications_threshold.png")
+plt.close()
 
 # 4. HDI Grouping
 # Create HDI groups
