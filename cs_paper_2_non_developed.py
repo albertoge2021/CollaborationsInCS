@@ -30,7 +30,7 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 # https://towardsdatascience.com/what-are-the-commonly-used-statistical-tests-in-data-science-a95cfc2e6b5e
 
 # Setup Data
-"""df = pd.read_csv("cs_dataset_final.csv")
+df = pd.read_csv("cs_dataset_final.csv")
 eng_df = pd.read_csv("english_level.csv")
 df = df[df["year"] > 1989]
 df = df[df["year"] < 2022]
@@ -43,7 +43,7 @@ df = df_filtered.drop("num_items", axis=1)
 unique_collaboration_types = df["type"].unique()
 selected_countries = ["US", "CN", "EU"]
 colors = ["deepskyblue", "limegreen", "orangered", "mediumpurple"]
-Path("paper_results_2/").mkdir(parents=True, exist_ok=True)"""
+Path("paper_results_2/").mkdir(parents=True, exist_ok=True)
 EU_COUNTRIES = [
     "AT",
     "BE",
@@ -311,7 +311,7 @@ dev_df_gropued = pd.DataFrame(
 )
 dev_df_gropued.to_csv("dev_df_north_south.csv", index=False)"""
 
-"""total_collaborations = defaultdict(dict)
+total_collaborations = defaultdict(dict)
 
 for row in tqdm(df.itertuples(), total=len(df), desc="Counting Countries"):
     country_list = literal_eval(row.countries)
@@ -470,19 +470,66 @@ merged_data = pd.merge(
 # Drop rows with missing values in the 'Hdi' column
 merged_data = merged_data.dropna(subset=["Hdi"])
 
+
+plt.figure(figsize=(10, 6))
+plt.scatter(df['Hdi'], df['TotalCollaborations'], alpha=0.5)
+plt.title('Total Collaborations vs. HDI')
+plt.xlabel('HDI')
+plt.ylabel('Total Collaborations')
+plt.grid(True)
+plt.show()
+
+# Select the features for clustering
+X = df[['Hdi', 'TotalCollaborations']]
+
+# Define the number of clusters (you can adjust this)
+k = 3
+kmeans = KMeans(n_clusters=k)
+df['Cluster'] = kmeans.fit_predict(X)
+
+# Plot the clustered data
+plt.figure(figsize=(10, 6))
+for i in range(k):
+    cluster_data = df[df['Cluster'] == i]
+    plt.scatter(cluster_data['Hdi'], cluster_data['TotalCollaborations'], label=f'Cluster {i}')
+    
+plt.title('Total Collaborations vs. HDI (Clustered)')
+plt.xlabel('HDI')
+plt.ylabel('Total Collaborations')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+threshold = 0.8  # Adjust this value to your threshold of interest
+plt.figure(figsize=(10, 6))
+plt.scatter(df['Hdi'], df['TotalCollaborations'], alpha=0.5)
+plt.axvline(x=threshold, color='r', linestyle='--', label=f'HDI Threshold ({threshold})')
+plt.title('Total Collaborations vs. HDI')
+plt.xlabel('HDI')
+plt.ylabel('Total Collaborations')
+plt.legend()
+plt.grid(True)
+plt.show()
+
 # 4. HDI Grouping
 # Create HDI groups
 bins = [0, 0.549, 0.699, 0.799, 1.0]
-labels = ["Low", "Medium", "High", 'Very High"']
+labels = ["Low", "Medium", "High", 'Very High']
 merged_data["HdiGroup"] = pd.cut(merged_data["Hdi"], bins=bins, labels=labels)
 
-# Calculate average total collaborations by HDI group
+# Calculate average/median total collaborations by HDI group
 average_collaborations_by_hdi = merged_data.groupby("HdiGroup")[
     "TotalCollaborations"
 ].mean()
+median_collaborations_by_hdi = merged_data.groupby("HdiGroup")[
+    "TotalCollaborations"
+].median()
 with open("paper_results_2/hdi_results.txt", "a") as file:
     file.write("Average Total Collaborations by HDI Group:\n")
     file.write(average_collaborations_by_hdi.to_string())
+    file.write("\n")
+    file.write("Median Total Collaborations by HDI Group:\n")
+    file.write(median_collaborations_by_hdi.to_string())
     file.write("\n")
 
 corr_coeff, p_value = pearsonr(merged_data["Hdi"], merged_data["TotalCollaborations"])
@@ -509,6 +556,8 @@ dev_df_grouped = pd.read_csv("dev_df_gropued.csv")
 
 data = []
 data_country = []
+# Initialize an empty graph
+G = nx.Graph()
 
 for row in tqdm(
     dev_df_grouped.itertuples(), total=len(dev_df_grouped), desc="Counting Countries"
@@ -535,8 +584,9 @@ for row in tqdm(
                 row.has_no_dev_country,
             )
         )
-        # for country in country_list:
-        # data_country.append((concept, year, row.citations, row.type, country, row.max_distance, row.avg_distance, row.has_no_dev_country))
+        #for country in country_list:
+        #    data_country.append((concept, year, row.citations, row.type, country, row.max_distance, row.avg_distance, row.has_no_dev_country))
+
 
 df_concepts = pd.DataFrame(
     data,
@@ -551,7 +601,24 @@ df_concepts = pd.DataFrame(
         "has_no_dev_country",
     ],
 )
-# df_concepts_country = pd.DataFrame(data_country, columns=['concept', 'year', 'citations', 'type', 'country', 'max_distance', 'avg_distance', 'has_no_dev_country'])
+'''df_concepts_country = pd.DataFrame(data_country, columns=['concept', 'year', 'citations', 'type', 'country', 'max_distance', 'avg_distance', 'has_no_dev_country'])
+
+selected_countries = ['KR', 'DE', 'US', 'CN', 'JP', 'GB', 'CA', 'AU', 'FR', 'ID', 'IN', 'BR', 'RU']
+selected_concept = 'Artificial intelligence'
+filtered_df = df_concepts_country[(df_concepts_country['country'].isin(selected_countries)) & (df_concepts_country['concept'] == selected_concept)]
+
+# Count the number of papers (rows) for each year and country
+paper_counts = filtered_df.groupby(['year', 'country']).size().reset_index(name='paper_count')
+
+# Create a lineplot using seaborn
+plt.figure(figsize=(12, 6))
+sns.lineplot(data=paper_counts, x='year', y='paper_count', hue='country')
+plt.title(f'Number of Papers for "{selected_concept}" by Year')
+plt.xlabel('Year')
+plt.ylabel('Number of Papers')
+plt.legend(title='Country', loc='upper left')
+plt.savefig(f"paper_results_2/line_topics_by_year_{selected_concept}.png")
+plt.close()'''
 
 # Task 1: Calculate and save statistics
 grouped_stats = (
@@ -622,7 +689,7 @@ for relation in df_concepts["has_no_dev_country"].unique():
     plt.ylabel("Number of collaborations")
     plt.title("10 most common topics by year for " + name)
     plt.savefig(f"paper_results_2/line_topics_by_year_{name}.png")
-    plt.close()"""
+    plt.close()
 
 # Load your data
 dev_df_north_south = pd.read_csv("dev_df_north_south.csv")

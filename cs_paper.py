@@ -1,6 +1,7 @@
 from ast import literal_eval
 from collections import Counter
 from matplotlib import patches
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 import pandas as pd
 import warnings
 import scipy.stats as stats
@@ -46,6 +47,14 @@ us_cn_citations = 0
 eu_cn_citations = 0
 eu_cn_us_citations = 0
 
+us_citations_list = []
+eu_citations_list = []
+cn_citations_list = []
+us_eu_citations_list = []
+us_cn_citations_list = []
+eu_cn_citations_list = []
+eu_cn_us_citations_list = []
+
 for row in tqdm(eu_df.itertuples()):
     country_list = literal_eval(row.countries)
     check = False
@@ -64,6 +73,7 @@ for row in tqdm(eu_df.itertuples()):
             ):
                 us_collaborations += 1
                 us_citations += citations
+                us_citations_list.append(citations)  # Append to the list
                 continue
         if "CN" in country_list:
             cn_collaborations_total += 1
@@ -75,6 +85,7 @@ for row in tqdm(eu_df.itertuples()):
             ):
                 cn_collaborations += 1
                 cn_citations += citations
+                cn_citations_list.append(citations)  # Append to the list
                 continue
         if "EU" in country_list:
             eu_collaborations_total += 1
@@ -86,21 +97,26 @@ for row in tqdm(eu_df.itertuples()):
             ):
                 eu_collaborations += 1
                 eu_citations += citations
+                eu_citations_list.append(citations)  # Append to the list
                 continue
         if "EU" in country_list and "CN" in country_list and "US" in country_list:
             eu_cn_us_collaborations += 1
             eu_cn_us_citations += citations
+            eu_cn_us_citations_list.append(citations)  # Append to the list
             continue
         else:
             if "US" in country_list and "CN" in country_list:
                 us_cn_collaborations += 1
                 us_cn_citations += citations
+                us_cn_citations_list.append(citations)  # Append to the list
             elif "US" in country_list and "EU" in country_list:
                 us_eu_collaborations += 1
                 us_eu_citations += citations
+                us_eu_citations_list.append(citations)  # Append to the list
             elif "EU" in country_list and "CN" in country_list:
                 eu_cn_collaborations += 1
                 eu_cn_citations += citations
+                eu_cn_citations_list.append(citations)  # Append to the list
 
 # Define the data
 us_data = [us_collaborations, us_eu_collaborations, us_cn_collaborations]
@@ -247,6 +263,25 @@ with open(f"paper_results/country_collaboration_cn_us_eu.txt", "w") as file:
     file.write(f"CN - EU collaboration {(eu_cn_collaborations)}\n")
     file.write(f"EU - US collaboration {(us_eu_collaborations)}\n")
     file.write(f"EU - US - CN collaboration {(eu_cn_us_collaborations)}\n")
+    # Perform ANOVA
+    f_statistic, p_value = stats.f_oneway(us_citations_list, eu_citations_list, cn_citations_list, us_eu_citations_list, us_cn_citations_list, eu_cn_citations_list, eu_cn_us_citations_list)
+
+    # Degrees of freedom
+    numerator_df = 6
+    denominator_df = len(us_citations_list) - 7  # Total number of observations minus the number of groups
+
+    # Check if the p-value is less than your chosen significance level (e.g., 0.05)
+    significance_level = 0.05
+
+    output_file = "anova_results.txt"  # Specify the file where you want to save the results
+
+    with open(output_file, 'w') as file:
+        if p_value < significance_level:
+            result = f"F({numerator_df}, {denominator_df}) = {f_statistic:.2f}, p = {p_value:.3f}\n"
+        else:
+            result = f"No statistically significant difference found: F({numerator_df}, {denominator_df}) = {f_statistic:.2f}, p = {p_value:.3f}\n"
+
+        file.write(result)
 
 us_mean_citations = us_citations / us_collaborations if us_collaborations > 0 else 0
 eu_mean_citations = eu_citations / eu_collaborations if eu_collaborations > 0 else 0
@@ -338,7 +373,7 @@ plt.legend(
 # Show the plot
 plt.title("All publications")
 plt.savefig(f"paper_results/bar_country_collaboration_citations_cn_us_eu.png")
-plt.close()
+plt.close()"""
 
 for collaboration_type in unique_collaboration_types:
     collab_df = eu_df[eu_df["type"] == collaboration_type]
@@ -579,12 +614,85 @@ for collaboration_type in unique_collaboration_types:
     else:
         name = "Education and Company"
     plt.title(name + " publications")
-    # Show the plot
     plt.savefig(
         f"paper_results/bar_country_collaboration_cn_us_eu_percent_type_{collaboration_type}.png"
     )
     plt.close()
 
+        # Create the main figure and subplot
+    fig, ax = plt.subplots()
+
+    # Plot the bars
+    ax.bar(x_us, us_data, color=colors, width=0.8, label="US")
+    ax.bar(x_eu, eu_data, color=colors, width=0.8, label="EU")
+    ax.bar(x_cn, cn_data, color=colors, width=0.8, label="CN")
+    ax.bar(x_all, all_data, color="mediumpurple", width=0.8, label="EU-CN-US")
+
+    # Add the x-axis labels and tick marks
+    ax.set_xticks([1.5, 6.5, 11.5])
+    ax.set_xticklabels(labels)
+    ax.set_xlabel("Country")
+    ax.set_ylabel("Percentage of Collaborations")
+
+    # Add a legend
+    legend_colors = [patches.Patch(color=color) for color in colors]
+    ax.legend(
+        handles=legend_colors,
+        labels=["US", "EU", "CN", "US-EU-CN"],
+        title="Regions",
+        loc="upper left",
+    )
+
+    # Show the plot
+    if collaboration_type == "education":
+        name = "Education-only"
+    elif collaboration_type == "company":
+        name = "Company-only"
+    else:
+        name = "Education and Company"
+    plt.title(name + " publications")
+    plt.savefig(
+        f"paper_results/bar_country_collaboration_cn_us_eu_type_{collaboration_type}_zoom.png"
+    )
+    plt.close()
+
+        # Create the main figure and subplot
+    fig, ax = plt.subplots()
+
+    # Plot the bars
+    ax.bar(x_us, us_data, color=colors, width=0.8, label="US")
+    ax.bar(x_eu, eu_data, color=colors, width=0.8, label="EU")
+    ax.bar(x_cn, cn_data, color=colors, width=0.8, label="CN")
+    ax.bar(x_all, all_data, color="mediumpurple", width=0.8, label="EU-CN-US")
+
+    # Add the x-axis labels and tick marks
+    ax.set_xticks([1.5, 6.5, 11.5])
+    ax.set_xticklabels(labels)
+    ax.set_xlabel("Country")
+    ax.set_ylabel("Percentage of Collaborations")
+
+    # Add a legend
+    legend_colors = [patches.Patch(color=color) for color in colors]
+    ax.legend(
+        handles=legend_colors,
+        labels=["US", "EU", "CN", "US-EU-CN"],
+        title="Regions",
+        loc="upper left",
+    )
+
+    # Show the plot
+    if collaboration_type == "education":
+        name = "Education-only"
+    elif collaboration_type == "company":
+        name = "Company-only"
+    else:
+        name = "Education and Company"
+    plt.title(name + " publications")
+    plt.savefig(
+        f"paper_results/bar_country_collaboration_cn_us_eu_percent_type_{collaboration_type}_zoom.png"
+    )
+    plt.close()
+"""
     us_mean_citations = us_citations / us_collaborations if us_collaborations > 0 else 0
     eu_mean_citations = eu_citations / eu_collaborations if eu_collaborations > 0 else 0
     cn_mean_citations = cn_citations / cn_collaborations if cn_collaborations > 0 else 0
@@ -685,7 +793,7 @@ for collaboration_type in unique_collaboration_types:
     plt.savefig(
         f"paper_results/bar_country_collaboration_citations_cn_us_eu_type_{collaboration_type}.png"
     )
-    plt.close()"""
+    plt.close()
 
 us_ratio_total = []
 eu_ratio_total = []
@@ -985,7 +1093,8 @@ df.boxplot(by="country", column=["citations"], grid=False)
 plt.title("Average number of citations by Region")
 plt.savefig(f"paper_results/boxplot_citations_by_countries.png")
 plt.close()
-"""
+
+
 collaborations = []
 
 for row in tqdm(eu_df.itertuples()):
@@ -1081,6 +1190,7 @@ plt.savefig(f"paper_results/lineplot_mean_citations_per_year_per_collaboration.p
 plt.close()
 
 collaborations = []
+all_concepts = []	
 
 for row in tqdm(eu_df.itertuples()):
     country_list = literal_eval(row.countries)
@@ -1133,6 +1243,24 @@ df[["relation", "citations"]].groupby("relation").describe().to_csv(
 )
 unique_relation_types = df["relation"].unique()
 
+concept_colors = {
+    'Physics': 'red',
+    'Artificial intelligence': 'blue',
+    'Programming language': 'green',
+    'Algorithm': 'orange',
+    'Telecommunications': 'purple',
+    'Materials science': 'cyan',
+    'Psychology': 'magenta',
+    'Biology': 'brown',
+    'Mathematics': 'pink',
+    'Engineering': 'gray',
+    'Quantum mechanics': 'lime',
+    'Chemistry': 'olive',
+    'Operating system': 'maroon',
+    'Medicine': 'navy',
+    'Economics': 'teal',
+}
+
 for relation in unique_relation_types:
     relation_df = df[df["relation"] == relation]
     test = (
@@ -1145,8 +1273,11 @@ for relation in unique_relation_types:
     test.drop(test[test["concept"] == "Computer science"].index, inplace=True)
     new_df = relation_df.loc[relation_df["concept"].isin(test.concept.to_list())]
     means_full = new_df.groupby(["concept", "year"]).size().reset_index(name="count")
+
+    # Plot the data using specified colors
     sns.lineplot(
-        data=means_full, x="year", y="count", hue="concept", markers=True, sort=True
+        data=means_full, x="year", y="count", hue="concept",
+        palette=concept_colors, markers=True, sort=True
     )
     plt.xlabel("Year")
     plt.legend(title="Concept")
