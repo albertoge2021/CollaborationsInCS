@@ -1,0 +1,48 @@
+Column: Mean_GDP
+Pearson Correlation: 0.01726666903729496
+Spearman Correlation: 0.05716517314615414
+Weak correlation.
+Weak monotonic correlation.
+
+Column: Median_GDP
+Pearson Correlation: 0.022903799410716935
+Spearman Correlation: 0.0601745390922879
+Weak correlation.
+Weak monotonic correlation.
+
+Column: Max_GDP
+Pearson Correlation: 0.0015119415379435746
+Spearman Correlation: 0.019659053886049736
+Weak correlation.
+Weak monotonic correlation.
+
+Column: Min_GDP
+Pearson Correlation: 0.027118246800886172
+Spearman Correlation: 0.06266451017007588
+Weak correlation.
+Weak monotonic correlation.
+
+Column: Mean_HDI
+Pearson Correlation: 0.04471568266632012
+Spearman Correlation: 0.11484999840520767
+Weak correlation.
+Weak monotonic correlation.
+
+Column: Median_HDI
+Pearson Correlation: 0.03984521644269188
+Spearman Correlation: 0.1031405738657062
+Weak correlation.
+Weak monotonic correlation.
+
+Column: Max_HDI
+Pearson Correlation: 0.03292195538857621
+Spearman Correlation: 0.11139530732544224
+Weak correlation.
+Weak monotonic correlation.
+
+Column: Min_HDI
+Pearson Correlation: 0.040997768111805576
+Spearman Correlation: 0.09481009990440674
+Weak correlation.
+Weak monotonic correlation.
+

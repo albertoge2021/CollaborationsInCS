@@ -349,7 +349,7 @@ sorted_collaborations = {
 with open('sorted_collaborations.json', 'w') as json_file:
     json.dump(sorted_collaborations, json_file)"""
 
-with open('sorted_collaborations.json', 'r') as json_file:
+"""with open('sorted_collaborations.json', 'r') as json_file:
     sorted_collaborations = json.load(json_file)
 threshold_percentage = 1  # You can adjust this threshold as needed
 
@@ -797,4 +797,80 @@ for hemis in unique_hemisphere_types:
     # Print the sorted counts for each country
     with open(f"paper_results_2/emisphere_count_{hemis}.txt", "w") as file:
         for country, count in sorted_country_counts.items():
-            file.write(f"{country}: {count}\n")
+            file.write(f"{country}: {count}\n")"""
+
+
+"""new_dev_df = dev_df.groupby(['Code_2', "Entity"])['Hdi'].mean().reset_index()
+low_hdi_df = new_dev_df[new_dev_df['Hdi'] < 0.549]
+df1_countries = low_hdi_df['Code_2'].unique()
+df1_countries_set = set(df1_countries)
+filtered =[]
+for row in tqdm(
+    df.itertuples(), total=len(df), desc="Counting Countries"
+):
+    concepts_list = literal_eval(row.concepts)
+    if any(country in df1_countries_set for country in literal_eval(row.countries)):
+        for concept in literal_eval(row.concepts):
+            filtered.append(
+                (
+                    concept,
+                    row.year,
+                    row.citations,
+                    row.type,
+                    literal_eval(row.countries)
+                )
+            )
+filtered_df2 = pd.DataFrame(
+    filtered,
+    columns=[ "concept", "year", "citations", "type", "countries"],
+)
+print(filtered_df2.head())
+
+year_counts = filtered_df2['year'].value_counts().sort_index()
+
+# Plot the number of rows by year
+plt.plot(year_counts.index, year_counts.values, marker='o')
+plt.xlabel('Year')
+plt.ylabel('Number of Collaborations')
+plt.title('Number of Collaborations by Year')
+plt.savefig(f"paper_results_2/linear_plot_publications_by_year_non_developed.png")
+plt.close()
+
+test = (
+    filtered_df2.groupby("concept")
+    .size()
+    .reset_index(name="count")
+    .sort_values(by=["count"], ascending=False)
+    .head(11)
+)
+test.drop(test[test["concept"] == "Computer science"].index, inplace=True)
+new_df = filtered_df2.loc[filtered_df2["concept"].isin(test.concept.to_list())]
+means_full = new_df.groupby(["concept", "year"]).size().reset_index(name="count")
+
+# Plot the data using specified colors
+sns.lineplot(
+    data=means_full, x="year", y="count", hue="concept",
+     markers=True, sort=True
+)
+plt.xlabel("Year")
+plt.legend(title="Concept")
+plt.ylabel("Number of collaborations")
+plt.title("10 most common topics by year")
+plt.savefig(f"paper_results/line_topics_by_year_non_developed.png")
+plt.close()
+
+citations_stats = filtered_df2['citations'].describe()
+
+# Save the names of the countries from df1 to a file
+with open('paper_results_2/country_names.txt', 'w') as file:
+    for country in df1_countries:
+        file.write(f"{country}\n")
+
+with open('paper_results_2/citations_stats.txt', 'w') as file:
+    file.write(f"{citations_stats}\n")
+
+# Optionally, you can save the statistical analysis results to a file
+citations_stats.to_csv('paper_results_2/citations_statistics.csv', header=True)"""
+
+
+# ordenadar datos segun geografia, desarrollo, pib, nivel de ingles

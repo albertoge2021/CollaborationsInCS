@@ -1,0 +1,24 @@
+Hemisphere Counts:
+              Year  Citations    Type  Countries  Mean_GDP  Median_GDP  Max_GDP  Min_GDP  Mean_HDI  Median_HDI  Max_HDI  Min_HDI
+Hemisphere                                                                                                                      
+M           148827     148827  148827     148827    148827      148827   148827   148827    148827      148827   148827   148827
+N           759804     759804  759804     759804    759804      759804   759804   759804    759804      759804   759804   759804
+S             7259       7259    7259       7259      7259        7259     7259     7259      7259        7259     7259     7259
+
+Average Citations by Hemisphere:
+Hemisphere
+M    32.997030
+N    34.503142
+S    24.630803
+
+Median Citations by Hemisphere:
+Hemisphere
+M    12.0
+N    13.0
+S     9.0
+
+Kruskal Test between Hemispheres:
+T-statistic: 518.3335609674722
+P-value: 2.788029362514161e-113
+
+Statistically significant differences exist between the groups.

@@ -619,7 +619,7 @@ for collaboration_type in unique_collaboration_types:
     )
     plt.close()
 
-        # Create the main figure and subplot
+    # Create the main figure and subplot
     fig, ax = plt.subplots()
 
     # Plot the bars
@@ -656,7 +656,7 @@ for collaboration_type in unique_collaboration_types:
     )
     plt.close()
 
-        # Create the main figure and subplot
+    # Create the main figure and subplot
     fig, ax = plt.subplots()
 
     # Plot the bars

@@ -1,0 +1,24 @@
+Group: Low GDP
+GDP Thresholds: 177.4905107003855 - 35734.452539097634
+Number of Rows: 523204
+Mean Citations: 32.686472198224784
+Median Citations: 12.0
+
+Group: Medium-Low GDP
+GDP Thresholds: 35734.452539097634 - 71468.90507819527
+Number of Rows: 385726
+Mean Citations: 36.32942555077957
+Median Citations: 13.0
+
+Group: Medium-High GDP
+GDP Thresholds: 71468.90507819527 - 107203.3576172929
+Number of Rows: 6845
+Mean Citations: 27.28108108108108
+Median Citations: 11.0
+
+Group: High GDP
+GDP Thresholds: 107203.3576172929 - 142760.31964569015
+Number of Rows: 115
+Mean Citations: 31.591304347826085
+Median Citations: 13.0
+
