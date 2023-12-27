@@ -1,115 +1,80 @@
-import asyncio
-import warnings
-import aiohttp
-import json
-from urllib.request import urlopen
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-
-
-warnings.simplefilter(action="ignore", category=FutureWarning)
+import threading
 import pandas as pd
-
-CSV_FILE_PATH = "cs_works_dataset.csv"
-
-
-async def get_work(work):
-    df = pd.DataFrame(
-        {
-            "work": str,
-            "title": str,
-            "year": int,
-            "language": str,
-            "citations": int,
-            "type": str,
-            "retracted": bool,
-            "institution_type": str,
-            "countries": [],
-            "concepts": [],
-        }
-    )
-
-    countries = []
-    institution_types = []
-
-    for authorship in work["authorships"]:
-        if "countries" in authorship:
-            countries.extend(authorship["countries"])
-        for institution in authorship["institutions"]:
-            institution_types.append(
-                institution["type"] if "type" in institution else None
-            )
-
-    if len(countries) <= 1:
-        return
-
-    df = df.append(
-        pd.Series(
-            [
-                work["id"],
-                work["title"],
-                work["publication_year"],
-                work["language"] if "language" in work else None,
-                work["cited_by_count"] if "cited_by_count" in work else None,
-                work["type"] if "type" in work else None,
-                work["is_retracted"],
-                institution_types if institution_types else None,
-                countries,
-                [concept["display_name"] for concept in work["concepts"]],
-            ],
-            index=df.columns,
-        ),
-        ignore_index=True,
-    )
-    df.to_csv(CSV_FILE_PATH, mode="a", index=False, header=False)
+from itertools import chain
+from pyalex import Works
+# Define a lock for thread safety
+lock = threading.Lock()
 
 
-async def main():
-    # Dataframe definition
-    header = pd.DataFrame(
-        {
-            "work": str,
-            "title": str,
-            "year": int,
-            "language": str,
-            "citations": int,
-            "type": str,
-            "retracted": bool,
-            "institution_type": str,
-            "countries": [],
-            "concepts": [],
-        }
-    )
-    csv_path = Path(CSV_FILE_PATH)
-    if not csv_path.is_file():
-        header.to_csv(CSV_FILE_PATH, index=False)
+def get_works(file_path: str, publication_year:int):
+    records = []
+    save_threshold = 20000
+    iterations = 0 
+    query = Works().filter(publication_year=publication_year, concept={"id": "C41008148"})
+    _, meta = query.get(return_meta=True)
+    for page in query.paginate(per_page=200, n_max=None):
+        for record in page:
+            countries = []
+            institution_types = []
+            for authorship in record["authorships"]:
+                if "countries" in authorship:
+                    countries.extend(authorship["countries"])
+                for institution in authorship["institutions"]:
+                    institution_types.append(
+                        institution["type"] if "type" in institution else None
+                    )
+            work = {}
+            for key in ['id', 'title', 'publication_year', 'cited_by_count', 'type', 'is_retracted']:
+                work[key] = record[key] if key in record else None
+            work['institution_types'] = institution_types if institution_types else None
+            work['countries'] = countries
+            work['concepts'] = [concept["display_name"] for concept in record["concepts"]]
+            records.append(work)
+            if len(records) >= save_threshold:
+                iterations += 1
+                print("Saving partial file..." + str(publication_year) + " - " + str(len(records) * iterations) + " / " + str(meta["count"]))
+                save_records(records, file_path)
+                records = []
 
-    next_cursor = "*"
-    async with aiohttp.ClientSession(
-        connector=aiohttp.TCPConnector(ssl=False)
-    ) as session:
-        while next_cursor:
-            # Change URL if local version is available
-            url = f"https://api.openalex.org/works?filter=concept.id:C41008148,institutions_distinct_count:%3E1,publication_year:%3E1989,publication_year:%3C2023&sort=cited_by_count:desc&per-page=200&cursor={next_cursor}"
-            try:
-                with urlopen(url) as response:
-                    content = response.read().decode("utf-8")
-            except Exception as e:
-                print(f"Error downloading content from {url}: {e}")
-                continue
-            try:
-                parsed_json = json.loads(content)
-            except:
-                print("Error parsing JSON data from page:", url)
-                continue
-            next_cursor = parsed_json["meta"]["next_cursor"]
-            if "results" in parsed_json:
-                for result in parsed_json["results"]:
-                    await get_work(result)
-            else:
-                print("error" + str(next_cursor))
+    if records:
+        save_records(records, file_path)
 
-            with open("paper_results_2/cursor.txt", "w") as file:
-                file.write(f"{next_cursor}\n")
+    # Merge partial files into the final dataset
+    merge_partial_files(file_path)
+
+    print(f"Saved {len(records)} works from {publication_year} to {file_path}.tsv")
 
 
-asyncio.run(main())
+def save_records(records, file_path):
+    with lock:
+        partial_df = pd.DataFrame.from_records(records)
+        partial_df.to_csv(file_path + "_partial.tsv", sep="\t", index=None, mode='a', header=not Path(file_path + "_partial.tsv").exists())
+
+
+def merge_partial_files(file_path):
+    partial_file_path = file_path + "_partial.tsv"
+    final_file_path = file_path + ".tsv"
+
+    with lock:
+        if Path(final_file_path).exists():
+            # Append data from the partial file to the final file
+            partial_df = pd.read_csv(partial_file_path, sep="\t")
+            partial_df.to_csv(final_file_path, sep="\t", index=None, mode='a', header=False)
+        else:
+            # Rename the partial file to the final file
+            Path(partial_file_path).rename(final_file_path)
+
+        # Remove the partial file
+        Path(partial_file_path).unlink()
+
+def process_year(year):
+    file_path = f"data/cs_works_{year}"
+    get_works(file_path, year)
+
+if __name__ == "__main__":
+    Path("data/").mkdir(parents=True, exist_ok=True)
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        years = [1993, 1997]
+        executor.map(process_year, years)
