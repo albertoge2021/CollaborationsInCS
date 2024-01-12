@@ -1,4 +1,0 @@
-Relation	Mean Avg Distance	Mean Max Distance
-CN	4324.75	7906.20
-EU	5217.63	8582.62
-US	6490.40	10261.59

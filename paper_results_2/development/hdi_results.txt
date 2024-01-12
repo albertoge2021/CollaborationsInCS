@@ -1,0 +1,122 @@
+Average Total Collaborations by HDI Group:
+HdiGroup
+Low            35.000000
+Medium         29.052632
+High          167.483871
+Very High    1002.062500
+Median Total Collaborations by HDI Group:
+HdiGroup
+Low            7.0
+Medium        12.0
+High          42.0
+Very High    499.0
+Pearson Correlation Coefficient: 0.35 - P-Value: 0.00009
+Spearman Correlation Coefficient: 0.54 - P-Value: 0.00000
+Average Total Collaborations by HDI Group:
+HdiGroup
+Low            35.000000
+Medium         29.052632
+High          167.483871
+Very High    1002.062500
+Median Total Collaborations by HDI Group:
+HdiGroup
+Low            7.0
+Medium        12.0
+High          42.0
+Very High    499.0
+Pearson Correlation Coefficient: 0.35 - P-Value: 0.00009
+Spearman Correlation Coefficient: 0.54 - P-Value: 0.00000
+Average Total Collaborations by HDI Group:
+HdiGroup
+Low            35.000000
+Medium         29.052632
+High          167.483871
+Very High    1002.062500
+Median Total Collaborations by HDI Group:
+HdiGroup
+Low            7.0
+Medium        12.0
+High          42.0
+Very High    499.0
+Pearson Correlation Coefficient: 0.35 - P-Value: 0.00009
+Spearman Correlation Coefficient: 0.54 - P-Value: 0.00000
+Average Total Collaborations by HDI Group:
+HdiGroup
+Low            35.000000
+Medium         29.052632
+High          167.483871
+Very High    1002.062500
+Median Total Collaborations by HDI Group:
+HdiGroup
+Low            7.0
+Medium        12.0
+High          42.0
+Very High    499.0
+Pearson Correlation Coefficient: 0.35 - P-Value: 0.00009
+Spearman Correlation Coefficient: 0.54 - P-Value: 0.00000
+T-Test results: -11.06 - P-Value: 0.00000
+There is a statistically significant difference between the groups.
+Average Total Collaborations by HDI Group:
+HdiGroup
+Low            35.000000
+Medium         29.052632
+High          167.483871
+Very High    1002.062500
+Median Total Collaborations by HDI Group:
+HdiGroup
+Low            7.0
+Medium        12.0
+High          42.0
+Very High    499.0
+Pearson Correlation Coefficient: 0.35 - P-Value: 0.00009
+Spearman Correlation Coefficient: 0.54 - P-Value: 0.00000
+T-Test results: -11.06 - P-Value: 0.00000
+There is a statistically significant difference between the groups.
+Average Total Collaborations by HDI Group:
+HdiGroup
+Low            35.000000
+Medium         29.052632
+High          167.483871
+Very High    1002.062500
+Median Total Collaborations by HDI Group:
+HdiGroup
+Low            7.0
+Medium        12.0
+High          42.0
+Very High    499.0
+Pearson Correlation Coefficient: 0.35 - P-Value: 0.00009
+Spearman Correlation Coefficient: 0.54 - P-Value: 0.00000
+T-Test results: -11.06 - P-Value: 0.00000
+There is a statistically significant difference between the groups.
+Average Total Collaborations by HDI Group:
+HdiGroup
+Low            35.000000
+Medium         29.052632
+High          167.483871
+Very High    1002.062500
+Median Total Collaborations by HDI Group:
+HdiGroup
+Low            7.0
+Medium        12.0
+High          42.0
+Very High    499.0
+Pearson Correlation Coefficient: 0.35 - P-Value: 0.00009
+Spearman Correlation Coefficient: 0.54 - P-Value: 0.00000
+T-Test results: -11.06 - P-Value: 0.00000
+There is a statistically significant difference between the groups.
+Average Total Collaborations by HDI Group:
+HdiGroup
+Low           145.408875
+Medium        428.884554
+High         1233.242550
+Very High    6792.795282
+Median Total Collaborations by HDI Group:
+HdiGroup
+Low            22.0
+Medium         39.0
+High          165.5
+Very High    2056.5
+Pearson Correlation Coefficient: 0.30 - P-Value: 0.00000
+Spearman Correlation Coefficient: 0.64 - P-Value: 0.00000
+T-Test results: -34.22 - P-Value: 0.00000
+There is a statistically significant difference between the groups.

@@ -57,7 +57,12 @@ df_melted.to_csv("gdp_dataset_normalized.csv", index=False)"""
 
 dev_df = pd.read_csv("human_dev_standard.csv")
 gdp_df = pd.read_csv("gdp_dataset_normalized.csv")
-df = pd.read_csv("cs_dataset_final.csv")
+file_path = "data_countries/combined_data.tsv"
+df = pd.read_csv(file_path, sep="\t")
+eng_df = pd.read_csv("english_level.csv")
+df = df[df["publication_year"] > 1989]
+df = df[df["publication_year"] < 2022]
+df = df.drop_duplicates()
 
 gdp_dict = {}
 
@@ -107,14 +112,20 @@ def get_hemisphere(country_code):
             return latitude
 
 
-country_latitudes = {}
+import json
+
+# Specify the path to your JSON file
+file_path = 'country_latitudes.json'
+
+# Open and read the JSON file
+with open(file_path, 'r') as file:
+    country_latitudes = json.load(file)
 
 for row in tqdm(df.itertuples(), total=len(df), desc="Counting Countries"):
     country_set = literal_eval(row.countries)
-    if len(set(country_set)) < 2:
-        continue
     gdp_values = []
     hdi_values = []
+    new_country_set = []
     for country in country_set:
         if country == "XK":
             country = "RS"
@@ -122,44 +133,28 @@ for row in tqdm(df.itertuples(), total=len(df), desc="Counting Countries"):
             country = "CN"
         if country == "GP":
             country = "FR"
+        new_country_set.append(country)
+    for country in new_country_set:
         if country in gdp_dict:
-            gdp_values.append(gdp_dict[country][str(row.year)])
+            gdp_values.append(gdp_dict[country][str(row.publication_year)])
         if country in hdi_dict[year]:
             hdi_values.append(hdi_dict[year][country])
 
-    set_gdp_values = []
-    set_hdi_values = []
-    for country in set(country_set):
-        if country == "XK":
-            country = "RS"
-        if country == "TW":
-            country = "CN"
-        if country == "GP":
-            country = "FR"
-        if country in gdp_dict:
-            set_gdp_values.append(gdp_dict[country][str(row.year)])
-        if country in hdi_dict[year]:
-            set_hdi_values.append(hdi_dict[year][country])
-
-    location_list = literal_eval(row.locations)
     checked_countries = {}
     northern = False
     southern = False
-    for location in location_list:
-        if location["country"] in checked_countries:
+    for country in new_country_set:
+        if country in checked_countries:
             continue
         else:
-            checked_countries[location["country"]] = True
-        if location["lat"] is None:
-            # Check if the latitude is already stored
-            if location["country"] not in country_latitudes:
-                geolocator = Nominatim(user_agent="country_hemisphere_checker")
-                country_latitudes[location["country"]] = geolocator.geocode(
-                    location["country"]
-                ).latitude
-            latitude = country_latitudes[location["country"]]
-        else:
-            latitude = location["lat"]
+            checked_countries[country] = True
+        # Check if the latitude is already stored
+        if country not in country_latitudes:
+            geolocator = Nominatim(user_agent="country_hemisphere_checker")
+            country_latitudes[country] = geolocator.geocode(
+                country
+            ).latitude
+        latitude = country_latitudes[country]
         if latitude > 0:
             northern = True
         elif latitude < 0:
@@ -174,38 +169,34 @@ for row in tqdm(df.itertuples(), total=len(df), desc="Counting Countries"):
 
     gdp_data.append(
         (
-            row.year,
-            row.citations,
+            row.title,
+            row.publication_year,
+            row.cited_by_count,
             row.type,
-            literal_eval(row.countries),
-            np.mean(set_gdp_values) if set_gdp_values else None,  # Mean GDP
-            np.median(gdp_values) if gdp_values else None,  # Median GDP
-            np.max(gdp_values) if gdp_values else None,  # Max GDP
-            np.min(gdp_values) if gdp_values else None,  # Min GDP
-            np.mean(set_hdi_values) if set_hdi_values else None,  # Mean HDI
-            np.median(hdi_values) if hdi_values else None,  # Median HDI
-            np.max(hdi_values) if hdi_values else None,  # Max HDI
-            np.min(hdi_values) if hdi_values else None,  # Min HDI
+            row.is_retracted,
+            row.institution_types,
+            row.countries,
+            row.concepts,
+            gdp_values,
+            hdi_values,
             hemisphere,
         )
     )
 
 columns = [
-    "Year",
-    "Citations",
-    "Type",
-    "Countries",
-    "Mean_GDP",
-    "Median_GDP",
-    "Max_GDP",
-    "Min_GDP",
-    "Mean_HDI",
-    "Median_HDI",
-    "Max_HDI",
-    "Min_HDI",
-    "Hemisphere",
+    "title",
+    "publication_year",
+    "citations",
+    "type",
+    "is_retracted",
+    "institution_types",
+    "countries",
+    "concepts",
+    "gdp",
+    "hdi",
+    "hemisphere",
 ]
 
 # Create a DataFrame using pib_data and columns
 result_df = pd.DataFrame(gdp_data, columns=columns)
-result_df.to_csv("gdp_hdi_hemisphere_dataset.csv", index=False)
+result_df.to_csv("data_countries/cs_works.csv", index=False)

@@ -23,14 +23,8 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 # https://towardsdatascience.com/what-are-the-commonly-used-statistical-tests-in-data-science-a95cfc2e6b5e
 
 # Setup Data
-df = pd.read_csv("cs_dataset_final.csv")
-df = df[df["year"] > 1989]
-df = df[df["year"] < 2022]
-df = df.drop_duplicates()
-df = df.dropna()
-df["num_items"] = df["countries"].apply(lambda x: len(x))
-df_filtered = df[df["num_items"] >= 2]
-df = df_filtered.drop("num_items", axis=1)
+file_path = "data_countries/cs_works.csv"
+df = pd.read_csv(file_path)
 
 unique_collaboration_types = df["type"].unique()
 selected_countries = ["US", "CN", "EU"]
@@ -167,10 +161,8 @@ for row in tqdm(df.itertuples()):
         (
             citations,
             row.type,
-            row.year,
+            row.publication_year,
             relation,
-            row.max_distance,
-            row.avg_distance,
         )
     )
 
@@ -182,11 +174,9 @@ for row in tqdm(df.itertuples()):
             (
                 citations,
                 row.type,
-                row.year,
+                row.publication_year,
                 relation,
                 country,
-                row.max_distance,
-                row.avg_distance,
             )
         )
 
@@ -198,8 +188,6 @@ countries_df = pd.DataFrame(
         "year",
         "relation",
         "country",
-        "max_distance",
-        "avg_distance",
     ],
 )
 
@@ -210,8 +198,6 @@ ratio_df = pd.DataFrame(
         "type",
         "year",
         "relation",
-        "max_distance",
-        "avg_distance",
     ],
 )
 
@@ -275,23 +261,6 @@ plt.tight_layout()
 plt.savefig(f"paper_results_2/barplot_avg_citations_per_country_group.png")
 plt.close()
 
-max_distance_per_country_group = ratio_df.groupby("relation")["max_distance"].mean()
-max_distance_per_country_group.plot(kind="bar")
-plt.title("Average Max Distance per Group of Countries")
-plt.xlabel("Group of Countries")
-plt.ylabel("Average Max Distance")
-plt.tight_layout()
-plt.savefig(f"paper_results_2/barplot_max_distance_per_country_group.png")
-plt.close()
-
-avg_distance_per_country_group = ratio_df.groupby("relation")["avg_distance"].mean()
-avg_distance_per_country_group.plot(kind="bar")
-plt.title("Average Mean Distance per Group of Countries")
-plt.xlabel("Group of Countries")
-plt.ylabel("Average Mean Distance")
-plt.tight_layout()
-plt.savefig(f"paper_results_2/barplot_avg_distance_per_country_group.png")
-plt.close()
 
 avg_citations_per_type_relation = (
     ratio_df.groupby(["type", "relation"])["citations"].mean().reset_index()
@@ -330,10 +299,8 @@ for row in tqdm(df.itertuples()):
         (
             citations,
             row.type,
-            row.year,
+            row.publication_year,
             relation,
-            row.max_distance,
-            row.avg_distance,
         )
     )
 
@@ -344,8 +311,6 @@ ratio_df = pd.DataFrame(
         "type",
         "year",
         "relation",
-        "max_distance",
-        "avg_distance",
     ],
 )
 
@@ -375,10 +340,8 @@ for row in tqdm(df.itertuples()):
             (
                 citations,
                 row.type,
-                row.year,
+                row.publication_year,
                 country,
-                row.max_distance,
-                row.avg_distance,
             )
         )
 
@@ -389,8 +352,6 @@ ratio_df = pd.DataFrame(
         "type",
         "year",
         "country",
-        "max_distance",
-        "avg_distance",
     ],
 )
 
@@ -714,18 +675,16 @@ for row in tqdm(df.itertuples()):
 
     for country in updated_list:
         hdi = result_dict.get(country, {}).get(
-            row.year, None
+            row.publication_year, None
         )  # Get HDI from the dictionary
         if any(code == "EU" for code in updated_list):
             new_df.append(
                 (
                     citations,
                     row.type,
-                    row.year,
+                    row.publication_year,
                     "EU",
                     country,
-                    row.max_distance,
-                    row.avg_distance,
                     hdi,
                 )
             )
@@ -734,11 +693,9 @@ for row in tqdm(df.itertuples()):
                 (
                     citations,
                     row.type,
-                    row.year,
+                    row.publication_year,
                     "US",
                     country,
-                    row.max_distance,
-                    row.avg_distance,
                     hdi,
                 )
             )
@@ -747,11 +704,9 @@ for row in tqdm(df.itertuples()):
                 (
                     citations,
                     row.type,
-                    row.year,
+                    row.publication_year,
                     "CN",
                     country,
-                    row.max_distance,
-                    row.avg_distance,
                     hdi,
                 )
             )
@@ -764,8 +719,6 @@ new_df = pd.DataFrame(
         "year",
         "relation",
         "country",
-        "max_distance",
-        "avg_distance",
         "hdi",
     ],
 )
@@ -786,22 +739,6 @@ grouped_collaborations = (
 )
 grouped_collaborations = grouped_collaborations.sort_values(
     by=["relation", "row_count"], ascending=[True, False]
-)
-
-# Group by 'relation' and 'country', calculate the highest avg_distance, and sort
-grouped_avg_distance = (
-    new_df.groupby(["relation", "country"])["avg_distance"].max().reset_index()
-)
-grouped_avg_distance = grouped_avg_distance.sort_values(
-    by=["relation", "avg_distance"], ascending=[True, False]
-)
-
-# Group by 'relation' and 'country', calculate the highest max_distance, and sort
-grouped_max_distance = (
-    new_df.groupby(["relation", "country"])["max_distance"].max().reset_index()
-)
-grouped_max_distance = grouped_max_distance.sort_values(
-    by=["relation", "max_distance"], ascending=[True, False]
 )
 
 unique_relations = grouped_citations["relation"].unique()
@@ -851,36 +788,6 @@ for relation in unique_relations:
     plt.savefig(f"paper_results_2/barplot_collaborations_by_country_{relation}.png")
     plt.close()
 
-    # Avg Distance
-    top_countries_data = grouped_avg_distance[
-        (grouped_avg_distance["relation"] == relation)
-    ].head(10)
-
-    plt.figure(figsize=(10, 6))
-    plt.bar(top_countries_data["country"], top_countries_data["avg_distance"])
-    plt.xlabel("Country")
-    plt.ylabel("Average Distance")
-    plt.title(f"Top 10 Countries with Highest Avg Distance for Relation: {relation}")
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.savefig(f"paper_results_2/barplot_avg_distance_by_country_{relation}.png")
-    plt.close()
-
-    # Max Distance
-    top_countries_data = grouped_max_distance[
-        (grouped_max_distance["relation"] == relation)
-    ].head(10)
-
-    plt.figure(figsize=(10, 6))
-    plt.bar(top_countries_data["country"], top_countries_data["max_distance"])
-    plt.xlabel("Country")
-    plt.ylabel("Max Distance")
-    plt.title(f"Top 10 Countries with Highest Max Distance for Relation: {relation}")
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.savefig(f"paper_results_2/barplot_max_distance_by_country_{relation}.png")
-    plt.close()
-
     relation_data = new_df[new_df["relation"] == relation]
 
     plt.figure(figsize=(10, 6))
@@ -896,29 +803,6 @@ for relation in unique_relations:
     plt.tight_layout()
     plt.savefig(f"paper_results_2/scatter_hdi_citations_{relation}.png")
     plt.close()
-
-grouped_distances = new_df.groupby("relation")[
-    "avg_distance", "max_distance", "hdi"
-].mean()
-
-# Create a text file to write the results
-with open("paper_results_2/distance_results.txt", "w") as file:
-    file.write("Relation\tMean Avg Distance\tMean Max Distance\n")
-
-    for relation, row in grouped_distances.iterrows():
-        mean_avg_distance = row["avg_distance"]
-        mean_max_distance = row["max_distance"]
-
-        file.write(f"{relation}\t{mean_avg_distance:.2f}\t{mean_max_distance:.2f}\n")
-
-# Create a text file to write the HDI results
-with open("paper_results_2/hdi_results.txt", "w") as file:
-    file.write("Relation\tMean HDI\n")
-
-    for relation, row in grouped_distances.iterrows():
-        mean_hdi = row["hdi"]
-
-        file.write(f"{relation}\t{mean_hdi:.2f}\n")
 
 
 collaborations = {
@@ -947,7 +831,7 @@ for row in tqdm(df.itertuples()):
             country_codes.append("EU")
         else:
             country_codes.append(country)
-    occurence_list.extend((country_code, row.year) for country_code in country_codes)
+    occurence_list.extend((country_code, row.publication_year) for country_code in country_codes)
 
     if (
         "US" in country_codes
@@ -1123,10 +1007,8 @@ for row in tqdm(df.itertuples()):
                 (
                     citations,
                     row.type,
-                    row.year,
+                    row.publication_year,
                     country,
-                    row.max_distance,
-                    row.avg_distance,
                     hdi,
                 )
             )
@@ -1138,8 +1020,6 @@ new_df = pd.DataFrame(
         "type",
         "year",
         "country",
-        "max_distance",
-        "avg_distance",
         "hdi",
     ],
 )

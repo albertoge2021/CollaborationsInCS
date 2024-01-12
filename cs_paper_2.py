@@ -1,18 +1,13 @@
 from ast import literal_eval
-from collections import Counter
 import csv
-from matplotlib import patches
 import pandas as pd
 import warnings
-import scipy.stats as stats
 import seaborn as sns
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-import numpy as np
 from pathlib import Path
 import geopandas as gpd
 import matplotlib.pyplot as plt
-from matplotlib.colors import Normalize
 import pycountry
 
 
@@ -23,14 +18,8 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 # https://towardsdatascience.com/what-are-the-commonly-used-statistical-tests-in-data-science-a95cfc2e6b5e
 
 # Setup Data
-df = pd.read_csv("cs_dataset_final.csv")
-df = df[df["year"] > 1989]
-df = df[df["year"] < 2022]
-df_all = df.drop_duplicates()
-df_all = df.dropna()
-df["num_items"] = df["countries"].apply(lambda x: len(x))
-df_filtered = df[df["num_items"] >= 2]
-df = df_filtered.drop("num_items", axis=1)
+file_path = "data_countries/cs_works.csv"
+df = pd.read_csv(file_path)
 
 unique_collaboration_types = df["type"].unique()
 selected_countries = ["US", "CN", "EU"]
@@ -327,7 +316,7 @@ for row in tqdm(df.itertuples()):
             country_codes.append("EU")
         else:
             country_codes.append(country)
-    occurence_list.extend((country_code, row.year) for country_code in country_codes)
+    occurence_list.extend((country_code, row.publication_year) for country_code in country_codes)
 
     if (
         "US" in country_codes
@@ -512,10 +501,8 @@ for row in tqdm(df.itertuples()):
                 (selected_countries_counts / num_countries) * 100,
                 citations,
                 row.type,
-                row.year,
+                row.publication_year,
                 "CN-US-EU",
-                row.max_distance,
-                row.avg_distance,
             )
         )
     else:
@@ -524,10 +511,8 @@ for row in tqdm(df.itertuples()):
                 100,
                 citations,
                 row.type,
-                row.year,
+                row.publication_year,
                 "Rest of the world",
-                row.max_distance,
-                row.avg_distance,
             )
         )
 
@@ -539,8 +524,6 @@ ratio_df = pd.DataFrame(
         "type",
         "year",
         "relation",
-        "max_distance",
-        "avg_distance",
     ],
 )
 means = ratio_df.groupby(["relation", "year"]).size().reset_index(name="count")
@@ -612,17 +595,3 @@ for collaboration_type in unique_collaboration_types:
     )
     plt.close()
 
-mean_citations = ratio_df.groupby("relation")["avg_distance"].mean()
-mean_citations.plot(kind="bar")
-plt.xlabel("Relation")
-plt.ylabel("Average Distance")
-plt.title("Average Distance by Relation")
-plt.savefig(f"paper_results_2/bar_avg_distance_by_countries.png")
-plt.close()
-mean_citations = ratio_df.groupby("relation")["max_distance"].mean()
-mean_citations.plot(kind="bar")
-plt.xlabel("Relation")
-plt.ylabel("Max Distance")
-plt.title("Max Distance by Relation")
-plt.savefig(f"paper_results_2/bar_max_distance_by_countries.png")
-plt.close()
