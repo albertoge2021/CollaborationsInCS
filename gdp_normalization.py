@@ -115,10 +115,10 @@ def get_hemisphere(country_code):
 import json
 
 # Specify the path to your JSON file
-file_path = 'country_latitudes.json'
+file_path = "country_latitudes.json"
 
 # Open and read the JSON file
-with open(file_path, 'r') as file:
+with open(file_path, "r") as file:
     country_latitudes = json.load(file)
 
 for row in tqdm(df.itertuples(), total=len(df), desc="Counting Countries"):
@@ -151,9 +151,7 @@ for row in tqdm(df.itertuples(), total=len(df), desc="Counting Countries"):
         # Check if the latitude is already stored
         if country not in country_latitudes:
             geolocator = Nominatim(user_agent="country_hemisphere_checker")
-            country_latitudes[country] = geolocator.geocode(
-                country
-            ).latitude
+            country_latitudes[country] = geolocator.geocode(country).latitude
         latitude = country_latitudes[country]
         if latitude > 0:
             northern = True

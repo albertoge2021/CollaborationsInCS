@@ -148,6 +148,7 @@ for row in tqdm(df.itertuples()):
     for country in country_list:
         country = "RS" if country == "XK" else country
         country = "CN" if country == "TW" else country
+        country = "CN" if country == "HK" else country
         country = "EU" if country in EU_COUNTRIES else country
         updated_list.append(country)
     citations = int(row.citations)
@@ -286,6 +287,7 @@ for row in tqdm(df.itertuples()):
     for country in country_list:
         country = "RS" if country == "XK" else country
         country = "CN" if country == "TW" else country
+        country = "CN" if country == "HK" else country
         country = "EU" if country in EU_COUNTRIES else country
         updated_list.append(country)
     citations = int(row.citations)
@@ -332,6 +334,7 @@ for row in tqdm(df.itertuples()):
     for country in country_list:
         country = "RS" if country == "XK" else country
         country = "CN" if country == "TW" else country
+        country = "CN" if country == "HK" else country
         country = "EU" if country in EU_COUNTRIES else country
         updated_list.append(country)
     citations = int(row.citations)
@@ -463,6 +466,7 @@ for row in tqdm(df.itertuples()):
     for country in country_list:
         country = "RS" if country == "XK" else country
         country = "CN" if country == "TW" else country
+        country = "CN" if country == "HK" else country
         country = "EU" if country in EU_COUNTRIES else country
         countries_ratio.append(country)
 
@@ -488,6 +492,7 @@ for row in tqdm(df.itertuples()):
             continue
         country = "RS" if country == "XK" else country
         country = "CN" if country == "TW" else country
+        country = "CN" if country == "HK" else country
         updated_list.append(pycountry.countries.get(alpha_2=country).alpha_3)
     if (
         any(country_code in updated_list for country_code in eu_countries_alpha_3)
@@ -827,11 +832,14 @@ for row in tqdm(df.itertuples()):
     for country in country_list:
         country = "RS" if country == "XK" else country
         country = "CN" if country == "TW" else country
+        country = "CN" if country == "HK" else country
         if country in EU_COUNTRIES:
             country_codes.append("EU")
         else:
             country_codes.append(country)
-    occurence_list.extend((country_code, row.publication_year) for country_code in country_codes)
+    occurence_list.extend(
+        (country_code, row.publication_year) for country_code in country_codes
+    )
 
     if (
         "US" in country_codes

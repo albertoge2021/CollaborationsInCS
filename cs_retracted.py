@@ -7,13 +7,13 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-df = pd.read_csv("data_countries/cs_works.csv")
+df = pd.read_csv("data_countries/Others_file.csv")
 
 # Group by 'is_retracted' and save to file
 retracted_grouped = (
     df.groupby("is_retracted").size().reset_index(name="count_retracted")
 )
-retracted_grouped.to_csv("paper_results_2/retracted/retracted_counts.csv", index=False)
+retracted_grouped.to_csv("results/regions/retracted_counts.csv", index=False)
 
 # Group by 'publication_year' and plot
 yearly_grouped = (
@@ -23,7 +23,7 @@ yearly_grouped.plot(x="publication_year", y="count_per_year", kind="bar", legend
 plt.xlabel("Publication Year")
 plt.ylabel("Number of Papers")
 plt.title("Number of Retracted Papers per Year")
-plt.savefig("paper_results_2/retracted/papers_per_year.png")
+plt.savefig("results/regions/papers_per_year.png")
 plt.close()
 
 # Count the number of non-retracted and retracted papers by year
@@ -43,7 +43,7 @@ yearly_retracted_count["percentage_retracted"] = (
 
 # Save the result to a file
 yearly_retracted_count.to_csv(
-    "paper_results_2/retracted/yearly_percentage_retracted.csv"
+    "results/regions/yearly_percentage_retracted.csv"
 )
 
 # Plot the percentage of retracted papers over the years
@@ -55,7 +55,7 @@ plt.plot(
 plt.title("Percentage of Retracted Papers Over the Years")
 plt.xlabel("Publication Year")
 plt.ylabel("Percentage of Retracted Papers")
-plt.savefig("paper_results_2/retracted/percentage_retracted_over_years.png")
+plt.savefig("results/regions/percentage_retracted_over_years.png")
 plt.close()
 
 from collections import defaultdict
@@ -148,7 +148,7 @@ df_by_country["percentage_retracted"] = (
 df_by_country = df_by_country.sort_values(by="percentage_retracted", ascending=False)
 
 # Save DataFrame to file
-df_by_country.to_csv("paper_results_2/retracted/country_results.csv", index=False)
+df_by_country.to_csv("results/regions/country_results.csv", index=False)
 
 
 # Convert dictionaries to DataFrames for result_by_concept
@@ -169,7 +169,7 @@ df_result_by_concept = df_result_by_concept.sort_values(
 
 # Save DataFrame to file
 df_result_by_concept.to_csv(
-    "paper_results_2/retracted/concepts_percentage.csv", index=False
+    "results/regions/concepts_percentage.csv", index=False
 )
 
 
@@ -195,7 +195,7 @@ df_retracted_by_institution_type = df_retracted_by_institution_type.sort_values(
 
 # Save DataFrame to file
 df_retracted_by_institution_type.to_csv(
-    "paper_results_2/retracted/retracted_by_institution_type.csv", index=False
+    "results/regions/retracted_by_institution_type.csv", index=False
 )
 
 
@@ -217,7 +217,7 @@ df_retracted_by_type = df_retracted_by_type.sort_values(
 
 # Save DataFrame to file
 df_retracted_by_type.to_csv(
-    "paper_results_2/retracted/retracted_by_type.csv", index=False
+    "results/regions/retracted_by_type.csv", index=False
 )
 
 # Calculate the percentage of retracted papers by collaborators
@@ -239,7 +239,7 @@ df_result_by_collaborators = df_result_by_collaborators.sort_values(by="collabor
 
 # Save DataFrame to file
 df_result_by_collaborators.to_csv(
-    "paper_results_2/retracted/collaborators_percentage.csv", index=False
+    "results/regions/collaborators_percentage.csv", index=False
 )
 
 # Separate the data into two groups based on is_retracted
@@ -263,4 +263,4 @@ t_test_results = pd.DataFrame(
 )
 
 # Save the DataFrame to a CSV file
-t_test_results.to_csv("paper_results_2/retracted/t_test_results.csv", index=False)
+t_test_results.to_csv("results/regions/t_test_results.csv", index=False)

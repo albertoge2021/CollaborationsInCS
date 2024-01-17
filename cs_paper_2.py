@@ -316,7 +316,9 @@ for row in tqdm(df.itertuples()):
             country_codes.append("EU")
         else:
             country_codes.append(country)
-    occurence_list.extend((country_code, row.publication_year) for country_code in country_codes)
+    occurence_list.extend(
+        (country_code, row.publication_year) for country_code in country_codes
+    )
 
     if (
         "US" in country_codes
@@ -594,4 +596,3 @@ for collaboration_type in unique_collaboration_types:
         f"paper_results_2/lineplot_collaborations_per_year_per_collaboration_by_type{collaboration_type}.png"
     )
     plt.close()
-

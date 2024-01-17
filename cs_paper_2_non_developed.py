@@ -440,11 +440,13 @@ plt.legend(title='Country', loc='upper left')
 plt.savefig(f"paper_results_2/line_topics_by_year_{selected_concept}.png")
 plt.close()"""
 
+
 def has_no_dev_country(hdi_list):
     return any(float(x) < 0.549 for x in literal_eval(hdi_list))
 
+
 # Apply the function to create the new column
-df['has_no_dev_country'] = df['hdi'].apply(has_no_dev_country)
+df["has_no_dev_country"] = df["hdi"].apply(has_no_dev_country)
 # Task 1: Calculate and save statistics
 grouped_stats = (
     df.groupby("has_no_dev_country")
@@ -497,9 +499,7 @@ data_country = []
 # Initialize an empty graph
 G = nx.Graph()
 
-for row in tqdm(
-    df.itertuples(), total=len(df), desc="Counting Countries"
-):
+for row in tqdm(df.itertuples(), total=len(df), desc="Counting Countries"):
     year = row.publication_year
     country_list = literal_eval(row.countries)
     country_list = [
@@ -520,7 +520,7 @@ for row in tqdm(
                 row.has_no_dev_country,
             )
         )
-        #for country in country_list:
+        # for country in country_list:
         #    data_country.append((concept, year, row.citations, row.type, country, row.max_distance, row.avg_distance, row.has_no_dev_country))
 
 
@@ -535,10 +535,15 @@ df_concepts = pd.DataFrame(
         "has_no_dev_country",
     ],
 )
-df_concepts_country = pd.DataFrame(data_country, columns=['concept', 'year', 'citations', 'type', 'country', 'has_no_dev_country'])
+df_concepts_country = pd.DataFrame(
+    data_country,
+    columns=["concept", "year", "citations", "type", "country", "has_no_dev_country"],
+)
 
 for relation in df_concepts_country["has_no_dev_country"].unique():
-    relation_df = df_concepts_country[df_concepts_country["has_no_dev_country"] == relation]
+    relation_df = df_concepts_country[
+        df_concepts_country["has_no_dev_country"] == relation
+    ]
     test = (
         df_concepts_country.groupby("concept")
         .size()
