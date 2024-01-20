@@ -1,0 +1,1 @@
+Spearman Correlation: r(170) = -0.543, p = 0.000

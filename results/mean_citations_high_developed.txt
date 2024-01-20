@@ -1,0 +1,3 @@
+Mean Citations for Collaborations with at least a Very High Developed Country:
+Has Very High Developed: 16.143199186591886
+Without Very High Developed: 8.872839408136796

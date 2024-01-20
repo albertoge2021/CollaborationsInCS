@@ -1,26 +1,24 @@
 from ast import literal_eval
-from collections import Counter, defaultdict
-import json
-from matplotlib import ticker
-import networkx as nx
-from pathlib import Path
-from scipy.stats import pearsonr, spearmanr
-from scipy.stats import ttest_ind
-from sklearn.cluster import KMeans
-from tqdm import tqdm
-import matplotlib.pyplot as plt
-import numpy as np
-import squarify
+from collections import Counter
+import csv
+from matplotlib import patches
 import pandas as pd
-import pycountry_convert as pc
+import warnings
 import scipy.stats as stats
 import seaborn as sns
-import warnings
+import matplotlib.pyplot as plt
+from tqdm import tqdm
+import numpy as np
+from pathlib import Path
+import geopandas as gpd
+import matplotlib.pyplot as plt
+from matplotlib.colors import Normalize
+import pycountry
 
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
-df = pd.read_csv("data_countries/cs_works.csv")
+# df = pd.read_csv("results/all_countries_other_countries_relation.csv")
 
 selected_countries = ["US", "CN", "EU"]
 EU_COUNTRIES = [
@@ -61,71 +59,251 @@ CN_COUNTRIES = [
     "TW",
 ]
 
-new_df_list = []
-countries_df_list = []
-concepts_df_list = []
+eu_countries_alpha_3 = [
+    "AUT",
+    "BEL",
+    "BGR",
+    "HRV",
+    "CYP",
+    "CZE",
+    "DNK",
+    "EST",
+    "FIN",
+    "FRA",
+    "DEU",
+    "GRC",
+    "HUN",
+    "IRL",
+    "ITA",
+    "LVA",
+    "LTU",
+    "LUX",
+    "MLT",
+    "NLD",
+    "POL",
+    "PRT",
+    "ROU",
+    "SVK",
+    "SVN",
+    "ESP",
+    "SWE",
+    "GBR",
+]
 
-for row in tqdm(df.itertuples(), total=len(df), desc="Counting Countries"):
-    country_list = []
-    countries = literal_eval(row.countries)
-    if len(set(countries)) < 2:
+collaborators_to_remove = [
+    "USA",
+    "CHN",
+    "AUT",
+    "BEL",
+    "BGR",
+    "HRV",
+    "CYP",
+    "CZE",
+    "DNK",
+    "EST",
+    "FIN",
+    "FRA",
+    "DEU",
+    "GRC",
+    "HUN",
+    "IRL",
+    "ITA",
+    "LVA",
+    "LTU",
+    "LUX",
+    "MLT",
+    "NLD",
+    "POL",
+    "PRT",
+    "ROU",
+    "SVK",
+    "SVN",
+    "ESP",
+    "SWE",
+    "GBR",
+    "XKG",
+    "TWN",
+]
+
+"""# Load world map
+world_map = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
+
+for index, row in tqdm(df.iterrows(), total=len(df)):
+    country = str(row['Country'])
+    if country is None or country == "nan":
         continue
-    else:
-        countries = set(countries)
-    for country in countries:
-        if country in EU_COUNTRIES:
-            country = "EU"
-        if country in CN_COUNTRIES:
-            country = "CN"
-        country_list.append(country)
 
-    # Check if all values are in ["US", "EU", "CN"]
-    if all(country in ["US", "EU", "CN"] for country in country_list):
-        relation = "US-EU-CN"
-    elif any(country in ["US", "EU", "CN"] for country in country_list):
-        relation = "Mixed"
-    else:
-        relation = "Others"
+    # Update country codes
+    if country == "XK":
+        country = "RS"
+    elif country == "TW":
+        country = "CN"
+    elif country == "HK":
+        country = "CN"
 
-    new_df_list.append(
-        (
-            #row.title,
-            row.publication_year,
-            row.citations,
-            row.type,
-            row.is_retracted,
-            row.institution_types,
-            row.countries,
-            row.concepts,
-            row.gdp,
-            row.hdi,
-            row.hemisphere,
-            relation,
-        )
+    # Get alpha-3 code from pycountry
+    try:
+        alpha_3 = pycountry.countries.get(alpha_2=country).alpha_3
+    except AttributeError:
+        # Handle the case where the country code is not found
+        alpha_3 = None  # You can choose a default value or handle it accordingly
+
+    # Update the DataFrame
+    df.at[index, 'Country'] = alpha_3
+
+world_map = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
+merged_df = world_map.merge(
+    df, left_on="iso_a3", right_on="Country", how="left"
+)
+fig, ax = plt.subplots(figsize=(12, 8))
+merged_df.plot(
+    column="Count",
+    cmap="YlOrRd",
+    linewidth=0.8,
+    ax=ax,
+    edgecolor="0.8",
+    legend=True,
+)
+merged_df[merged_df["iso_a3"].isin(collaborators_to_remove)].plot(
+    color="Blue", ax=ax
+)
+ax.set_title(f"Number of collaborations between Other Countries")
+plt.savefig(f"results/map_number_of_collaborations_other_countries.png")
+plt.show()
+plt.close()"""
+
+concept_colors = {
+    "Physics": "red",
+    "Artificial intelligence": "blue",
+    "Programming language": "green",
+    "Machine learning": "orange",
+    "Optics": "purple",
+    "Materials science": "cyan",
+    "Psychology": "magenta",
+    "Biology": "brown",
+    "Mathematics": "pink",
+    "Engineering": "gray",
+    "Quantum mechanics": "lime",
+    "Chemistry": "olive",
+    "Operating system": "maroon",
+    "Medicine": "navy",
+    "Economics": "teal",
+}
+
+new_df = pd.read_csv("new_df.csv")
+us_eu_cn_rows = {}
+mixed_rows = {}
+other_rows = {}
+
+for row in tqdm(
+    new_df.itertuples(),
+    total=len(new_df),
+    desc="Counting Institution Types and Concepts",
+):
+    concepts = set(literal_eval(row.concepts))
+    relation = str(row.relation)
+    for concept in concepts:
+        if relation == "US-EU-CN":
+            us_eu_cn_rows[concept] = us_eu_cn_rows.get(concept, 0) + 1
+        elif relation == "Mixed":
+            mixed_rows[concept] = mixed_rows.get(concept, 0) + 1
+        elif relation == "Other Countries":
+            other_rows[concept] = other_rows.get(concept, 0) + 1
+
+# Convert dictionaries to DataFrames
+us_eu_cn_df = pd.DataFrame(list(us_eu_cn_rows.items()), columns=["concept", "count"])
+mixed_df = pd.DataFrame(list(mixed_rows.items()), columns=["concept", "count"])
+other_df = pd.DataFrame(list(other_rows.items()), columns=["concept", "count"])
+
+
+# Function to plot top N concepts for a DataFrame and save the plot
+def plot_top_concepts_and_save(temp_df, title):
+    temp_df = temp_df[temp_df["concept"] != "Computer science"]
+    df_sorted = temp_df.sort_values(by="count", ascending=False)
+    top_10 = df_sorted.head(10)
+    sns.set(style="whitegrid", palette=concept_colors.values())
+    plt.figure(figsize=(10, 6))  # Adjust the figure size as needed
+    sns.barplot(x=top_10["concept"], y=top_10["count"])
+    plt.xlabel("Concept")
+    plt.ylabel("Number of occurrences")
+    plt.title(title)
+    plt.xticks(rotation=45, ha="right")
+    plt.savefig(
+        f"results/{title.lower().replace(' ', '_')}_top_concepts.png",
+        bbox_inches="tight",
     )
+    plt.close()
 
-new_df = pd.DataFrame(
-    new_df_list,
-    columns=[
-        #"title",
-        "publication_year",
-        "citations",
-        "type",
-        "is_retracted",
-        "institution_types",
-        "countries",
-        "concepts",
-        "gdp",
-        "hdi",
-        "hemisphere",
-        "relation",
-    ],
+
+# Plot top 10 concepts for each DataFrame and save the plots
+plot_top_concepts_and_save(
+    us_eu_cn_df, "Most frequent Concepts in US-EU-CN colaborations"
+)
+plot_top_concepts_and_save(mixed_df, "Most frequent Concepts in Mixed colaborations")
+plot_top_concepts_and_save(
+    other_df, "Most frequent Concepts in Other Countries colaborations"
 )
 
-relation_groups = dict(tuple(new_df.groupby('relation')))
+us_eu_cn_rows = []
+mixed_rows = []
+other_rows = []
 
-# Save each group into a separate file
-for relation, df_group in relation_groups.items():
-    filename = f"data_countries/{relation}_file.csv"
-    df_group.to_csv(filename, index=False)
-    print(f"Saved {relation} data to {filename}")
+for row in tqdm(
+    new_df.itertuples(),
+    total=len(new_df),
+    desc="Counting Institution Types and Concepts",
+):
+    concepts = set(literal_eval(row.concepts))
+    relation = str(row.relation)
+    year = row.publication_year
+    for concept in concepts:
+        if relation == "US-EU-CN":
+            us_eu_cn_rows.append((year, concept))
+        elif relation == "Mixed":
+            mixed_rows.append((year, concept))
+        elif relation == "Other Countries":
+            other_rows.append((year, concept))
+
+# Create DataFrames for each relation
+us_eu_cn_df = pd.DataFrame(us_eu_cn_rows, columns=["year", "concept"])
+mixed_df = pd.DataFrame(mixed_rows, columns=["year", "concept"])
+other_df = pd.DataFrame(other_rows, columns=["year", "concept"])
+
+
+def plot_top_concepts_by_year(temp_df: pd.DataFrame, title):
+    temp_df = temp_df[temp_df["concept"] != "Computer science"]
+    df_grouped = temp_df.groupby(["year", "concept"]).size().reset_index(name="count")
+    top_concepts_2021 = df_grouped[df_grouped["year"] == 2021].nlargest(10, "count")
+    top_concepts_2021.to_csv("results/top_concepts_2021.txt", sep="\t", index=False)
+    top_concepts_by_year = df_grouped[
+        df_grouped["concept"].isin(top_concepts_2021["concept"])
+    ]
+    plt.figure(figsize=(12, 6))
+    sns.lineplot(
+        x="year",
+        y="count",
+        hue="concept",
+        data=top_concepts_by_year,
+        palette=concept_colors,
+    )
+    plt.title(title)
+    plt.xlabel("Year")
+    plt.ylabel("Number of occurrences")
+    plt.legend(title="Concept", loc="upper left")
+    plt.savefig(
+        f"results/{title.lower().replace(' ', '_')}_top_concepts_by_year.png",
+        bbox_inches="tight",
+    )
+    plt.close()
+
+
+# Plot top 10 concepts by year for each DataFrame
+plot_top_concepts_by_year(
+    us_eu_cn_df, "Most frequent Concepts in US-EU-CN colaborations by Year"
+)
+plot_top_concepts_by_year(
+    mixed_df, "Most frequent Concepts in Mixed colaborations by Year"
+)
+plot_top_concepts_by_year(
+    other_df, "Most frequent Concepts in Other Countries colaborations by Year"
+)

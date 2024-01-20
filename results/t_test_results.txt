@@ -1,0 +1,12 @@
+T-test between US-EU-CN and Mixed:
+T-statistic: 5.9993126272988215
+P-value: 1.9817821231017955e-09
+
+T-test between US-EU-CN and Other Countries:
+T-statistic: 43.28653537663391
+P-value: 0.0
+
+T-test between Mixed and Other Countries:
+T-statistic: 31.791786399819053
+P-value: 9.638144516863223e-222
+

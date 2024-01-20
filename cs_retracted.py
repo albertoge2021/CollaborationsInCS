@@ -42,9 +42,7 @@ yearly_retracted_count["percentage_retracted"] = (
 ) * 100
 
 # Save the result to a file
-yearly_retracted_count.to_csv(
-    "results/regions/yearly_percentage_retracted.csv"
-)
+yearly_retracted_count.to_csv("results/regions/yearly_percentage_retracted.csv")
 
 # Plot the percentage of retracted papers over the years
 plt.figure(figsize=(10, 6))
@@ -168,9 +166,7 @@ df_result_by_concept = df_result_by_concept.sort_values(
 )
 
 # Save DataFrame to file
-df_result_by_concept.to_csv(
-    "results/regions/concepts_percentage.csv", index=False
-)
+df_result_by_concept.to_csv("results/regions/concepts_percentage.csv", index=False)
 
 
 # Convert dictionaries to DataFrames for retracted_by_institution_type
@@ -216,9 +212,7 @@ df_retracted_by_type = df_retracted_by_type.sort_values(
 )
 
 # Save DataFrame to file
-df_retracted_by_type.to_csv(
-    "results/regions/retracted_by_type.csv", index=False
-)
+df_retracted_by_type.to_csv("results/regions/retracted_by_type.csv", index=False)
 
 # Calculate the percentage of retracted papers by collaborators
 result_by_collaborators["percentage_retracted"] = [
