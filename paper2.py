@@ -279,7 +279,7 @@ for i, collaborators in enumerate(result_by_collaborators["collaborators"]):
 df_filtered = pd.DataFrame(filtered_data)
 
 # Check for normality using Shapiro-Wilk test
-stat, shapiro_p_value = shapiro(df_filtered['percentage_retracted'])
+stat, shapiro_p_value = shapiro(df_filtered["percentage_retracted"])
 
 # Perform Pearson or Spearman correlation test based on normality result
 if shapiro_p_value > 0.05:  # If p-value > 0.05, assume normal distribution
@@ -290,10 +290,15 @@ else:
     correlation_test = spearmanr
 
 # Perform correlation test
-corr, p_value = correlation_test(df_filtered['collaborators'], df_filtered['percentage_retracted'])
+corr, p_value = correlation_test(
+    df_filtered["collaborators"], df_filtered["percentage_retracted"]
+)
 
 # Save results in APA format to a text file
 with open("results/correlation_results_for_collaborators.txt", "w") as f:
+    f.write(
+        f"Shapiro-Wilk Test for Normality: W({len(df_filtered)}) = {stat:.3f}, p = {shapiro_p_value:.3f}\n"
+    )
     f.write(
         f"{correlation_method} Correlation: r({len(df_filtered) - 2}) = {corr:.3f}, p = {p_value:.3f}\n"
     )
@@ -303,10 +308,12 @@ df_filtered = df_filtered[df_filtered["collaborators"] <= filter_limit]
 # Plotting
 plt.figure(figsize=(10, 6))
 sns.lineplot(data=df_filtered, x="collaborators", y="percentage_retracted")
-plt.title("Percentage of Retracted Works by Number of Collaborators (up to 20)")
-plt.xlabel("Number of Collaborators")
-plt.ylabel("Percentage of Retraction")
-plt.xticks(range(1, filter_limit + 1))  # Set x-axis ticks to integer values
+plt.title(
+    "Percentage of Retracted Works by Number of Collaborators (up to 20)", fontsize=16
+)
+plt.xlabel("Number of Collaborators", fontsize=14)
+plt.ylabel("Percentage of Retraction", fontsize=14)
+plt.xticks(range(1, filter_limit + 1), fontsize=14)  # Set x-axis ticks to integer values
 plt.grid(True)
 plt.savefig(f"results/lineplot_correlation_collaborators_retraction.png")
 plt.close()
@@ -366,7 +373,7 @@ for relation in new_df["relation"].unique():
     df_filtered = pd.DataFrame(filtered_data)
 
     # Check for normality using Shapiro-Wilk test
-    stat, shapiro_p_value = shapiro(df_filtered['percentage_retracted'])
+    stat, shapiro_p_value = shapiro(df_filtered["percentage_retracted"])
 
     # Perform Pearson or Spearman correlation test based on normality result
     if shapiro_p_value > 0.05:  # If p-value > 0.05, assume normal distribution
@@ -377,10 +384,17 @@ for relation in new_df["relation"].unique():
         correlation_test = spearmanr
 
     # Perform correlation test
-    corr, p_value = correlation_test(df_filtered['collaborators'], df_filtered['percentage_retracted'])
+    corr, p_value = correlation_test(
+        df_filtered["collaborators"], df_filtered["percentage_retracted"]
+    )
 
     # Save results in APA format to a text file
-    with open(f"results/correlation_results_for_collaborators_{relation}.txt", "w") as f:
+    with open(
+        f"results/correlation_results_for_collaborators_{relation}.txt", "w"
+    ) as f:
+        f.write(
+            f"Shapiro-Wilk Test for Normality: W({len(df_filtered)}) = {stat:.3f}, p = {shapiro_p_value:.3f}\n"
+        )
         f.write(
             f"{correlation_method} Correlation: r({len(df_filtered) - 2}) = {corr:.3f}, p = {p_value:.3f}\n"
         )
@@ -397,11 +411,12 @@ for relation in new_df["relation"].unique():
     plt.figure(figsize=(10, 6))
     sns.lineplot(data=df_filtered, x="collaborators", y="percentage_retracted")
     plt.title(
-        f"Percentage of Retracted Works by Number of Collaborators (up to 20) for {relation_name}"
+        f"Percentage of Retracted Works by Number of Collaborators (up to 20) for {relation_name}",
+        fontsize=16,
     )
-    plt.xlabel("Number of Collaborators")
-    plt.ylabel("Percentage of Retraction")
-    plt.xticks(range(1, filter_limit + 1))  # Set x-axis ticks to integer values
+    plt.xlabel("Number of Collaborators", fontsize=14)
+    plt.ylabel("Percentage of Retraction", fontsize=14)
+    plt.xticks(range(1, filter_limit + 1), fontsize=14)  # Set x-axis ticks to integer values
     plt.grid(True)
     plt.savefig(f"results/lineplot_correlation_collaborators_retraction_{relation}.png")
     plt.close()
@@ -480,9 +495,9 @@ counts = (
 sns.lineplot(
     data=counts, x="publication_year", y="count", hue="relation", palette=colors
 )
-plt.xlabel("Year")
-plt.ylabel("Number of collaborations")
-plt.title("Number of collaborations by regions per year")
+plt.xlabel("Year", fontsize=14)
+plt.ylabel("Number of collaborations", fontsize=14)
+plt.title("Number of collaborations by regions per year", fontsize=16)
 plt.savefig(f"results/lineplot_collaborations_per_year_per_collaboration.png")
 plt.close()
 
@@ -493,9 +508,9 @@ plt.figure(figsize=(10, 6))
 sns.barplot(
     x="relation", y="citations", data=new_df, estimator="mean", ci=None, palette=colors
 )
-plt.title("Mean Citations by Relation")
-plt.xlabel("Relation")
-plt.ylabel("Mean Citations")
+plt.title("Mean Citations by Relation", fontsize=16)
+plt.xlabel("Relation", fontsize=14)
+plt.ylabel("Mean Citations", fontsize=14)
 plt.savefig(f"results/barplot_mean_citations_per_relation.png")
 plt.close()
 
@@ -509,9 +524,9 @@ sns.barplot(
     ci=None,
     palette=colors,
 )
-plt.title("Median Citations by Relation")
-plt.xlabel("Relation")
-plt.ylabel("Median Citations")
+plt.title("Median Citations by Relation", fontsize=16)
+plt.xlabel("Relation", fontsize=14)
+plt.ylabel("Median Citations", fontsize=14)
 plt.savefig(f"results/barplot_median_citations_per_relation.png")
 plt.close()
 
@@ -532,9 +547,9 @@ plt.figure(figsize=(10, 6))
 sns.barplot(
     x="hdi_class", y="avg_citations", hue="relation", data=avg_citations, palette=colors
 )
-plt.xlabel("HDI Classification")
-plt.ylabel("Average Citations")
-plt.title("Average Citations by HDI Classification and Relation")
+plt.xlabel("HDI Classification", fontsize=14)
+plt.ylabel("Average Citations", fontsize=14)
+plt.title("Average Citations by HDI Classification and Relation", fontsize=16)
 plt.legend(title="Relation", loc="upper right")
 plt.savefig(f"results/barplot_hdi_mean_citations_per_relation.png")
 plt.close()
@@ -544,9 +559,9 @@ result = new_df.groupby(["hdi_class", "relation"]).size().reset_index(name="coun
 # Create a bar plot
 plt.figure(figsize=(10, 6))
 sns.barplot(x="hdi_class", y="count", hue="relation", data=result, palette=colors)
-plt.xlabel("HDI Classification")
-plt.ylabel("Number of Collaborations")
-plt.title("Number of Collaborations by HDI Classification and Relation")
+plt.xlabel("HDI Classification", fontsize=14)
+plt.ylabel("Number of Collaborations", fontsize=14)
+plt.title("Number of Collaborations by HDI Classification and Relation", fontsize=16)
 plt.legend(title="Relation", loc="upper right")
 plt.savefig(f"results/barplot_hdi_collaborations_per_relation.png")
 plt.close()
@@ -564,9 +579,11 @@ result["percentage"] = result.apply(
 # Create a bar plot
 plt.figure(figsize=(10, 6))
 sns.barplot(x="hdi_class", y="percentage", hue="relation", data=result, palette=colors)
-plt.xlabel("HDI Classification")
-plt.ylabel("Percentage of Collaborations")
-plt.title("Percentage of Collaborations by HDI Classification and Relation")
+plt.xlabel("HDI Classification", fontsize=14)
+plt.ylabel("Percentage of Collaborations", fontsize=14)
+plt.title(
+    "Percentage of Collaborations by HDI Classification and Relation", fontsize=16
+)
 plt.legend(title="Relation", loc="upper right")
 plt.savefig(f"results/barplot_hdi_percentage_collaborations_per_relation.png")
 plt.close()
@@ -585,9 +602,9 @@ retraction_stats.to_csv("results/retraction_stats.csv", index=False)
 # Step 3: Plot the percentages in a bar plot by relation
 plt.figure(figsize=(10, 6))
 sns.barplot(x="relation", y="percentage", data=retraction_stats, palette=colors)
-plt.xlabel("Relation")
-plt.ylabel("Percentage of Retracted Articles")
-plt.title("Percentage of Retracted Articles by Relation")
+plt.xlabel("Relation", fontsize=14)
+plt.ylabel("Percentage of Retracted Articles", fontsize=14)
+plt.title("Percentage of Retracted Articles by Relation", fontsize=16)
 plt.savefig(f"results/barplot_retracted_publications_per_relation.png")
 plt.close()
 
@@ -609,9 +626,9 @@ sns.lineplot(
     data=retraction_stats,
     palette=colors,
 )
-plt.xlabel("Publication Year")
-plt.ylabel("Percentage of Retracted Articles")
-plt.title("Percentage of Retracted Articles by Relation and Year")
+plt.xlabel("Publication Year", fontsize=14)
+plt.ylabel("Percentage of Retracted Articles", fontsize=14)
+plt.title("Percentage of Retracted Articles by Relation and Year", fontsize=16)
 plt.legend(title="Relation", loc="upper right")
 plt.savefig(f"results/lineplot_retracted_publications_per_relation_by_year.png")
 plt.close()
@@ -630,9 +647,9 @@ plt.figure(figsize=(12, 6))
 sns.barplot(
     x="type", y="count", hue="relation", data=top_types_by_relation, palette=colors
 )
-plt.xlabel("Publication Type")
-plt.ylabel("Count")
-plt.title("Top 5 Most Common Types by Relation")
+plt.xlabel("Publication Type", fontsize=14)
+plt.ylabel("Number of ocurrences", fontsize=14)
+plt.title("Top 5 Most Common Types by Relation", fontsize=16)
 plt.legend(title="Relation", loc="upper right")
 plt.savefig(f"results/barplot_type_per_relation.png")
 plt.close()
@@ -658,9 +675,9 @@ plt.figure(figsize=(12, 6))
 sns.barplot(
     x="type", y="percentage", hue="relation", data=top_types_by_relation, palette=colors
 )
-plt.xlabel("Publication Type")
-plt.ylabel("Percentage")
-plt.title("Top 5 Most Common Types by Relation (Percentage)")
+plt.xlabel("Publication Type", fontsize=14)
+plt.ylabel("Percentage", fontsize=14)
+plt.title("Top 5 Most Common Types by Relation (Percentage)", fontsize=16)
 plt.legend(title="Relation", loc="upper right")
 plt.savefig("results/barplot_type_percentage_per_relation.png")
 plt.close()
@@ -901,10 +918,10 @@ top_countries_by_count = country_stats_df.nlargest(10, "Count")
 # Plot barplot for top 10 countries by count
 plt.figure(figsize=(10, 6))
 plt.bar(top_countries_by_count["Country"], top_countries_by_count["Count"])
-plt.xlabel("Country")
+plt.xlabel("Country", fontsize=14)
 plt.ylabel("Publications")
-plt.title("Top 10 Most Published Countries for Mixed Relation")
-plt.xticks(rotation=45, ha="right")
+plt.title("Top 10 Most Published Countries for Mixed Relation", fontsize=16)
+plt.xticks(rotation=45, ha="right", fontsize=14)
 plt.savefig("results/bar_plot_most_published_countries.png")
 plt.close()
 
@@ -917,10 +934,10 @@ plt.bar(
     top_countries_by_citations["Country"],
     top_countries_by_citations["Average Citations"],
 )
-plt.xlabel("Country")
+plt.xlabel("Country", fontsize=14)
 plt.ylabel("Average Citations")
-plt.title("Top 10 Countries by Average Citation for Mixed Relation")
-plt.xticks(rotation=45, ha="right")
+plt.title("Top 10 Countries by Average Citation for Mixed Relation", fontsize=16)
+plt.xticks(rotation=45, ha="right", fontsize=14)
 plt.savefig("results/bar_plot_highest_avg_citations.png")
 plt.close()
 
@@ -946,10 +963,13 @@ top_countries_by_count = country_stats_df.nlargest(10, "Count")
 # Plot barplot for top 10 countries by count
 plt.figure(figsize=(10, 6))
 plt.bar(top_countries_by_count["Country"], top_countries_by_count["Count"])
-plt.xlabel("Country")
-plt.ylabel("Publications")
-plt.title("Top 10 Most Published Countries for Mixed Relation (Excluding US, CN, EU)")
-plt.xticks(rotation=45, ha="right")
+plt.xlabel("Country", fontsize=14)
+plt.ylabel("Publications", fontsize=14)
+plt.title(
+    "Top 10 Most Published Countries for Mixed Relation (Excluding US, CN, EU)",
+    fontsize=16,
+)
+plt.xticks(rotation=45, ha="right", fontsize=14)
 plt.savefig("results/bar_plot_most_published_countries_without_selected.png")
 plt.close()
 
@@ -962,12 +982,13 @@ plt.bar(
     top_countries_by_citations["Country"],
     top_countries_by_citations["Average Citations"],
 )
-plt.xlabel("Country")
-plt.ylabel("Average Citations")
+plt.xlabel("Country", fontsize=14)
+plt.ylabel("Average Citations", fontsize=14)
 plt.title(
-    "Top 10 Countries by Average Citation for Mixed Relation (Excluding US, CN, EU)"
+    "Top 10 Countries by Average Citation for Mixed Relation (Excluding US, CN, EU)",
+    fontsize=16,
 )
-plt.xticks(rotation=45, ha="right")
+plt.xticks(rotation=45, ha="right", fontsize=14)
 plt.savefig("results/bar_plot_highest_avg_citations_without_selected.png")
 plt.close()
 
@@ -1017,10 +1038,10 @@ top_countries_by_count = country_stats_df.nlargest(10, "Count")
 # Plot barplot for top 10 countries by count
 plt.figure(figsize=(10, 6))
 plt.bar(top_countries_by_count["Country"], top_countries_by_count["Count"])
-plt.xlabel("Country")
-plt.ylabel("Publications")
-plt.title("Top 10 Most Published Countries for Other Countries Relation")
-plt.xticks(rotation=45, ha="right")
+plt.xlabel("Country", fontsize=14)
+plt.ylabel("Publications", fontsize=14)
+plt.title("Top 10 Most Published Countries for Other Countries Relation", fontsize=16)
+plt.xticks(rotation=45, ha="right", fontsize=14)
 plt.savefig("results/bar_plot_most_published_countries_other_countries.png")
 plt.close()
 
@@ -1033,10 +1054,12 @@ plt.bar(
     top_countries_by_citations["Country"],
     top_countries_by_citations["Average Citations"],
 )
-plt.xlabel("Country")
-plt.ylabel("Average Citations")
-plt.title("Top 10 Countries by Average Citation for Other Countries Relation")
-plt.xticks(rotation=45, ha="right")
+plt.xlabel("Country", fontsize=14)
+plt.ylabel("Average Citations", fontsize=14)
+plt.title(
+    "Top 10 Countries by Average Citation for Other Countries Relation", fontsize=16
+)
+plt.xticks(rotation=45, ha="right", fontsize=14)
 plt.savefig("results/bar_plot_highest_avg_citations_other_countries.png")
 plt.close()
 
@@ -1062,12 +1085,13 @@ top_countries_by_count = country_stats_df.nlargest(10, "Count")
 # Plot barplot for top 10 countries by count
 plt.figure(figsize=(10, 6))
 plt.bar(top_countries_by_count["Country"], top_countries_by_count["Count"])
-plt.xlabel("Country")
-plt.ylabel("Publications")
+plt.xlabel("Country", fontsize=14)
+plt.ylabel("Publications", fontsize=14)
 plt.title(
-    "Top 10 Most Published Countries for Other Countries Relation (Excluding US, CN, EU)"
+    "Top 10 Most Published Countries for Other Countries Relation (Excluding US, CN, EU)",
+    fontsize=16,
 )
-plt.xticks(rotation=45, ha="right")
+plt.xticks(rotation=45, ha="right", fontsize=14)
 plt.savefig(
     "results/bar_plot_most_published_countries_without_selected_other_countries.png"
 )
@@ -1082,12 +1106,13 @@ plt.bar(
     top_countries_by_citations["Country"],
     top_countries_by_citations["Average Citations"],
 )
-plt.xlabel("Country")
-plt.ylabel("Average Citations")
+plt.xlabel("Country", fontsize=14)
+plt.ylabel("Average Citations", fontsize=14)
 plt.title(
-    "Top 10 Countries by Average Citation for Other Countries Relation (Excluding US, CN, EU)"
+    "Top 10 Countries by Average Citation for Other Countries Relation (Excluding US, CN, EU)",
+    fontsize=16,
 )
-plt.xticks(rotation=45, ha="right")
+plt.xticks(rotation=45, ha="right", fontsize=14)
 plt.savefig(
     "results/bar_plot_highest_avg_citations_without_selected_other_countries.png"
 )
@@ -1134,9 +1159,12 @@ plt.bar(
     ["Has Low-developed", "No Low-developed"],
     [non_developed_group["citations"].mean(), developed_group["citations"].mean()],
 )
-plt.xlabel("Development Status")
-plt.ylabel("Average Citations")
-plt.title("Average Citations for Collaborations with at least a Low Developed Country")
+plt.xlabel("Development Status", fontsize=14)
+plt.ylabel("Average Citations", fontsize=14)
+plt.title(
+    "Average Citations for Collaborations with at least a Low Developed Country",
+    fontsize=16,
+)
 plt.savefig("results/bar_plot_average_citations_low_developed.png")
 plt.close()
 
@@ -1178,10 +1206,11 @@ plt.bar(
     ["Has Very High Developed", "No Very High Developed"],
     [high_developed_group["citations"].mean(), other_group["citations"].mean()],
 )
-plt.xlabel("Development Status")
-plt.ylabel("Average Citations")
+plt.xlabel("Development Status", fontsize=14)
+plt.ylabel("Average Citations", fontsize=14)
 plt.title(
-    "Average Citations for Collaborations with at least a Very High Developed Country"
+    "Average Citations for Collaborations with at least a Very High Developed Country",
+    fontsize=16,
 )
 plt.savefig("results/bar_plot_average_citations_high_developed.png")
 plt.close()
@@ -1378,6 +1407,7 @@ concept_colors = {
     "Operating system": "maroon",
     "Medicine": "navy",
     "Economics": "teal",
+    "Algorithm": "gold",
 }
 
 us_eu_cn_rows = {}
@@ -1410,11 +1440,11 @@ def plot_top_concepts_and_save(temp_df, title):
     temp_df = temp_df[temp_df["concept"] != "Computer science"]
     df_sorted = temp_df.sort_values(by="count", ascending=False)
     top_10 = df_sorted.head(10)
-    sns.barplot(top_10["concept"], top_10["count"], palette=concept_colors)
-    plt.xlabel("Concept")
-    plt.ylabel("Number of occurrences")
-    plt.title(title)
-    plt.xticks(rotation=45, ha="right")
+    sns.barplot(data=top_10, x="concept", y="count", palette=concept_colors)
+    plt.xlabel("Concept", fontsize=14)
+    plt.ylabel("Number of occurrences", fontsize=14)
+    plt.title(title, fontsize=16)
+    plt.xticks(rotation=45, ha="right", fontsize=14)
     plt.savefig(
         f"results/{title.lower().replace(' ', '_')}_top_concepts.png",
         bbox_inches="tight",
@@ -1473,9 +1503,9 @@ def plot_top_concepts_by_year(temp_df: pd.DataFrame, title):
         data=top_concepts_by_year,
         palette=concept_colors,
     )
-    plt.title(title)
-    plt.xlabel("Year")
-    plt.ylabel("Number of occurrences")
+    plt.title(title, fontsize=16)
+    plt.xlabel("Year", fontsize=14)
+    plt.ylabel("Number of occurrences", fontsize=14)
     plt.legend(title="Concept", loc="upper left")
     plt.savefig(
         f"results/{title.lower().replace(' ', '_')}_top_concepts_by_year.png",
