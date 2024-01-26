@@ -234,12 +234,14 @@ result_by_collaborators = {
     "non_retracted_count": [],
     "percentage_retracted": [],
 }
+collaborators_citations = defaultdict(list)
 total_by_type = defaultdict(int)
 
 # Iterate through the DataFrame rows with tqdm
 for row in tqdm(new_df.itertuples(), total=len(new_df), desc="Counting Collaborators"):
     countries = literal_eval(row.countries)
     is_retracted = row.is_retracted
+    citations = row.citations
 
     # Count the number of collaborators
     num_collaborators = len(countries)
@@ -255,6 +257,14 @@ for row in tqdm(new_df.itertuples(), total=len(new_df), desc="Counting Collabora
         result_by_collaborators["retracted_count"][index] += 1
     else:
         result_by_collaborators["non_retracted_count"][index] += 1
+    collaborators_citations[num_collaborators].append(citations)
+
+# Calculate mean citations by the number of collaborators
+mean_citations_by_collaborators = {}
+for num_collaborators, citations_list in collaborators_citations.items():
+    mean_citations_by_collaborators[num_collaborators] = sum(citations_list) / len(
+        citations_list
+    )
 
 # Filter data for collaborators up to 20
 filter_limit = 20
@@ -303,6 +313,25 @@ with open("results/correlation_results_for_collaborators.txt", "w") as f:
         f"{correlation_method} Correlation: r({len(df_filtered) - 2}) = {corr:.3f}, p = {p_value:.3f}\n"
     )
 
+
+mean_citations_df = pd.DataFrame(
+    mean_citations_by_collaborators.items(), columns=["Collaborators", "Mean_Citations"]
+)
+
+pearson_corr, pearson_p_value = stats.pearsonr(
+    mean_citations_df["Collaborators"], mean_citations_df["Mean_Citations"]
+)
+spearman_corr, spearman_p_value = stats.spearmanr(
+    mean_citations_df["Collaborators"], mean_citations_df["Mean_Citations"]
+)
+
+# Save results to a text file
+with open("results/citations_by_number_of_participants.txt", "w") as f:
+    f.write("Pearson correlation coefficient: {}\n".format(pearson_corr))
+    f.write("Pearson p-value: {}\n\n".format(pearson_p_value))
+    f.write("Spearman correlation coefficient: {}\n".format(spearman_corr))
+    f.write("Spearman p-value: {}\n".format(spearman_p_value))
+
 df_filtered = df_filtered[df_filtered["collaborators"] <= filter_limit]
 
 # Plotting
@@ -313,7 +342,9 @@ plt.title(
 )
 plt.xlabel("Number of Collaborators", fontsize=14)
 plt.ylabel("Percentage of Retraction", fontsize=14)
-plt.xticks(range(1, filter_limit + 1), fontsize=14)  # Set x-axis ticks to integer values
+plt.xticks(
+    range(1, filter_limit + 1), fontsize=14
+)  # Set x-axis ticks to integer values
 plt.grid(True)
 plt.savefig(f"results/lineplot_correlation_collaborators_retraction.png")
 plt.close()
@@ -416,7 +447,9 @@ for relation in new_df["relation"].unique():
     )
     plt.xlabel("Number of Collaborators", fontsize=14)
     plt.ylabel("Percentage of Retraction", fontsize=14)
-    plt.xticks(range(1, filter_limit + 1), fontsize=14)  # Set x-axis ticks to integer values
+    plt.xticks(
+        range(1, filter_limit + 1), fontsize=14
+    )  # Set x-axis ticks to integer values
     plt.grid(True)
     plt.savefig(f"results/lineplot_correlation_collaborators_retraction_{relation}.png")
     plt.close()
@@ -534,6 +567,22 @@ plt.close()
 bins = [0, 0.549, 0.699, 0.799, 1.0]
 labels = ["Low", "Medium", "High", "Very High"]
 new_df["hdi_class"] = pd.cut(new_df["mean_hdi"], bins=bins, labels=labels, right=False)
+
+hdi_row_counts = new_df.groupby("mean_hdi").size()
+
+# Calculate Pearson correlation coefficient
+pearson_corr, pearson_p_value = stats.spearmanr(
+    hdi_row_counts.index, hdi_row_counts.values
+)
+
+# Print correlation coefficient and p-value
+print("Spearman correlation coefficient:", pearson_corr)
+print("Spearman p-value:", pearson_p_value)
+
+# Save results to a text file
+with open("results/correlation_mean_hdi_row_counts.txt", "w") as f:
+    f.write("Pearson correlation coefficient: {}\n".format(pearson_corr))
+    f.write("Pearson p-value: {}\n".format(pearson_p_value))
 
 # Calculate average citations for each 'hdi_class' and 'relation'
 avg_citations = (
@@ -875,14 +924,14 @@ plt.legend(title="Relation", loc="upper right")
 plt.savefig("results/barplot_institution_type_per_relation.png")
 plt.close()"""
 
-mixed_df = new_df[new_df["relation"] == "Other Countries"]
+mixed_df = new_df[new_df["relation"] == "Mixed"]
 
 country_counts = {}
 country_citations = {}
 for row in tqdm(
     mixed_df.itertuples(),
     total=len(mixed_df),
-    desc="Counting Countries for Other Countries Relation",
+    desc="Counting Countries for Mixed Relation",
 ):
     countries = set(literal_eval(row.countries))
     for country in countries:

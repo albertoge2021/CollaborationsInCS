@@ -1,3 +1,3 @@
 Statistical Test Result:
-T-statistic: 39.9603798481272
+T-statistic: 38.214942193202454
 P-value: 0.0

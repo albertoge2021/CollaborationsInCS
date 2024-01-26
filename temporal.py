@@ -171,7 +171,7 @@ ax.set_title(f"Number of collaborations between Other Countries")
 plt.savefig(f"results/map_number_of_collaborations_other_countries.png")
 plt.show()
 plt.close()"""
-
+"""
 concept_colors = {
     "Physics": "red",
     "Artificial intelligence": "blue",
@@ -307,3 +307,95 @@ plot_top_concepts_by_year(
 plot_top_concepts_by_year(
     other_df, "Most frequent Concepts in Other Countries colaborations by Year"
 )
+"""
+
+import pandas as pd
+import pycountry
+
+# Read the first DataFrame
+df_without_collabs = pd.read_csv("results/all_countries_other_countries_relation.csv")
+
+# Read the second DataFrame
+df_with_collabs = pd.read_csv("results/all_countries_mixed_relation.csv")
+
+
+# Function to convert ISO2 country code to country name
+def iso2_to_country_name(iso2_code):
+    try:
+        country = pycountry.countries.get(alpha_2=str(iso2_code))
+        return country.name
+    except AttributeError:
+        return iso2_code
+
+
+# Apply the function to convert ISO2 country codes to country names
+df_with_collabs["Country"] = df_with_collabs["Country"].apply(iso2_to_country_name)
+df_without_collabs["Country"] = df_without_collabs["Country"].apply(
+    iso2_to_country_name
+)
+
+# Rename columns
+df_with_collabs = df_with_collabs.rename(
+    columns={
+        "Count": "Number of publications",
+        "Average Citations": "Average citations",
+    }
+)
+df_without_collabs = df_without_collabs.rename(
+    columns={
+        "Count": "Number of publications",
+        "Average Citations": "Average citations",
+    }
+)
+
+# Merge the two DataFrames on the 'Country' column
+merged_df = pd.merge(
+    df_with_collabs,
+    df_without_collabs,
+    on="Country",
+    suffixes=("_with_collabs", "_without_collabs"),
+)
+
+# Sort by 'Number of publications' without collaborations with CN-EU-US
+merged_df = merged_df.sort_values(
+    by="Number of publications_with_collabs", ascending=False
+)
+
+# Select top 40 rows
+merged_df = merged_df.head(50)
+
+# Create a new DataFrame with desired columns
+final_df = merged_df[
+    [
+        "Country",
+        "Number of publications_with_collabs",
+        "Number of publications_without_collabs",
+        "Average citations_with_collabs",
+        "Average citations_without_collabs",
+    ]
+]
+
+# Save DataFrame to LaTeX format with legend
+with open("results/combined_table.tex", "w") as f:
+    f.write("\\begin{table}[ht]\n")
+    f.write("\\centering\n")
+    f.write("\\begin{tabular}{lcccc}\n")
+    f.write("\\hline\n")
+    f.write("Country & [1] & [2] & [3] & [4]  \\\n")
+    f.write("\\hline\n")
+    for _, row in final_df.iterrows():
+        f.write(
+            "{} & {:.2f} & {:.2f} & {:.2f} & {:.2f}\\\\\n".format(
+                row["Country"],
+                row["Number of publications_with_collabs"],
+                row["Number of publications_without_collabs"],
+                row["Average citations_with_collabs"],
+                row["Average citations_without_collabs"],
+            )
+        )
+    f.write("\\hline\n")
+    f.write("\\end{tabular}\n")
+    f.write(
+        "\caption{Legend: [1] = Number of publications with CN-EU-US, [2] = Number of publications without CN-EU-US, [3] = Average citations with CN-EU-US, [4] = Average citations without CN-EU-US}\n"
+    )
+    f.write("\\end{table}\n")

@@ -1,0 +1,5 @@
+Pearson correlation coefficient: 0.11891320089731552
+Pearson p-value: 0.12026124204377699
+
+Spearman correlation coefficient: 0.046965908266197516
+Spearman p-value: 0.5406711351751213

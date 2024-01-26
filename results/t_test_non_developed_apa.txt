@@ -1,5 +1,5 @@
 APA Format Result for Collaborations with at least a Low Developed Country:
 
-T(312178) = -13.98, p = 0.000
+T(1559548) = -18.32, p = 0.000
 
 The difference in citations between groups is statistically significant.

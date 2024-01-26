@@ -1,6 +1,6 @@
-Number of Retracted Works for High-Developed Group: 295
-Total Number of Works for High-Developed Group: 274401
-Percentage of Retracted Works for High-Developed Group: 0.11%
-Number of Retracted Works for Other Group: 94
-Total Number of Works for Other Group: 37779
-Percentage of Retracted Works for Other Group: 0.25%
+Number of Retracted Works for High-Developed Group: 561
+Total Number of Works for High-Developed Group: 1532059
+Percentage of Retracted Works for High-Developed Group: 0.04%
+Number of Retracted Works for Other Group: 87
+Total Number of Works for Other Group: 27491
+Percentage of Retracted Works for Other Group: 0.32%
