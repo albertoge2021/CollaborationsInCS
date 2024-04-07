@@ -1,0 +1,12 @@
+US - US only collaboration represents 70.81% of total US collaborations
+CN - CN only collaboration represents 66.21% of total CN collaborations
+EU - EU only collaboration represents 69.12% of total EU collaborations
+CN - US collaboration represents 8.10% of total US collaborations
+CN - US collaboration represents 22.05% of total Chinese collaborations
+CN - EU collaboration represents 9.27% of total CN collaborations
+CN - EU collaboration represents 4.29% of total EU collaborations
+EU - US collaboration represents 20.19% of total US collaborations
+EU - US collaboration represents 25.44% of total EU collaborations
+EU - US - CN collaboration represents 0.91% of total US collaborations
+EU - US - CN collaboration represents 1.14% of total EU collaborations
+EU - US - CN collaboration represents 2.47% of total CN collaborations

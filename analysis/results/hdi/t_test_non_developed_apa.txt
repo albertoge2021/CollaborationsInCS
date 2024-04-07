@@ -1,0 +1,5 @@
+APA Format Result for Collaborations with at least a Low Developed Country:
+
+T(829328) = 6.42, p = 0.000
+
+The difference in cited_by_count between groups is statistically significant.

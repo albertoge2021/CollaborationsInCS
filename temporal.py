@@ -361,9 +361,6 @@ merged_df = merged_df.sort_values(
     by="Number of publications_with_collabs", ascending=False
 )
 
-# Select top 40 rows
-merged_df = merged_df.head(50)
-
 # Create a new DataFrame with desired columns
 final_df = merged_df[
     [

@@ -1,0 +1,26 @@
+Number of rows: 10128273
+
+Number of rows by Country Relation: 
+country_relation
+CN-EU                75406
+CN-EU-US              7747
+CN-US               127228
+CN-only            1434617
+EU-US               192318
+EU-only            1827181
+Mixed               829330
+Other countries    2941349
+US-only            1697513
+
+Percentage of each group:
+country_relation
+CN-EU               0.744510
+CN-EU-US            0.076489
+CN-US               1.256167
+CN-only            14.164478
+EU-US               1.898823
+EU-only            18.040400
+Mixed               8.188267
+Other countries    29.040973
+US-only            16.760143
+
