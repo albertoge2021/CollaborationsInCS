@@ -1,1 +1,0 @@
-Kruskal Test for citations by typeKruskalResult(statistic=12445.554717047886, pvalue=0.0)Kruskal Test for citations by typeKruskalResult(statistic=537.1544537896992, pvalue=7.842925415473957e-119)Kruskal Test for citations by typeKruskalResult(statistic=0.43186413021839387, pvalue=0.5110756627882151)

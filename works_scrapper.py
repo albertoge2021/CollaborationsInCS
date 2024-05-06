@@ -9,6 +9,7 @@ from pyalex import Works
 # Define a lock for thread safety
 lock = threading.Lock()
 
+
 def get_works(file_path: str, publication_year: int):
     try:
         records = []
@@ -49,7 +50,9 @@ def get_works(file_path: str, publication_year: int):
                     "is_retracted",
                 ]:
                     work[key] = record[key] if key in record else None
-                work["institution_types"] = institution_types if institution_types else None
+                work["institution_types"] = (
+                    institution_types if institution_types else None
+                )
                 work["countries"] = countries
                 work["num_participants"] = len(record["authorships"])
                 work["concepts"] = [
@@ -64,12 +67,13 @@ def get_works(file_path: str, publication_year: int):
             save_records(records, file_path)
 
         print(f"Saved {len(records)} works from {publication_year} to {file_path}.tsv")
-    
+
     except requests.exceptions.ConnectionError:
         # If connection error occurs, delete the file and re-raise the exception
         if os.path.exists(file_path + ".tsv"):
             os.remove(file_path + ".tsv")
         raise
+
 
 def save_records(records, file_path):
     with lock:
@@ -82,12 +86,14 @@ def save_records(records, file_path):
             header=not Path(file_path + ".tsv").exists(),
         )
 
+
 def process_year(year):
     file_path = f"computer_science_works/cs_works_{year}"
     get_works(file_path, year)
 
+
 if __name__ == "__main__":
     Path("computer_science_works/").mkdir(parents=True, exist_ok=True)
-    years = [2021]
+    years = range(1990, 2023)
     with ThreadPoolExecutor(max_workers=3) as executor:
         executor.map(process_year, years)

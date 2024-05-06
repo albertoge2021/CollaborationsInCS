@@ -1,5 +1,0 @@
-APA Format Result for Collaborations with at least a Very High Developed Country:
-
-T(1559548) = 38.21, p = 0.000
-
-The difference in citations between groups is statistically significant.

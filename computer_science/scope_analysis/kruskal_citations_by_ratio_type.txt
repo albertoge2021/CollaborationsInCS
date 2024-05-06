@@ -1,1 +1,0 @@
-Kruskal Test for citations by ratio typeKruskalResult(statistic=428.79823264296203, pvalue=7.720525409600928e-94)

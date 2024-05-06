@@ -1,2 +1,0 @@
-Pearson Correlation Coefficient: 0.43 - P-Value: 0.00001
-Spearman Correlation Coefficient: 0.57 - P-Value: 0.00000

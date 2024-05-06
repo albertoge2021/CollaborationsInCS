@@ -1,1 +1,0 @@
-Kruskal Test for Max distance by typeKruskalResult(statistic=0.008595024243818954, pvalue=0.9261344659249469)

@@ -1,0 +1,11 @@
+year	concept	count
+2021	Artificial intelligence	15609
+2021	Mathematics	12908
+2021	Physics	11124
+2021	Engineering	10531
+2021	Quantum mechanics	6436
+2021	Biology	6059
+2021	Machine learning	5973
+2021	Programming language	5782
+2021	Operating system	5632
+2021	Algorithm	5542

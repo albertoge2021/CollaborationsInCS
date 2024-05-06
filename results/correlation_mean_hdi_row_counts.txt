@@ -1,2 +1,0 @@
-Pearson correlation coefficient: 0.003156360320449901
-Pearson p-value: 0.4620320551557494

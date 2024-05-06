@@ -1,0 +1,3 @@
+Mean Citations for Collaborations with at least a Low Developed Country:
+Has Non-developed: 21.07733218341239
+Has Only Developed: 26.507937313171617

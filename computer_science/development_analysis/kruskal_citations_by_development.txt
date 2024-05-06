@@ -1,1 +1,0 @@
-Kruskal Test for Mean distance by typeKruskalResult(statistic=741.7557933746936, pvalue=2.488869134641349e-163)

@@ -1,6 +1,0 @@
-Number of Retracted Works for Non-Developed Group: 64
-Total Number of Works for Non-Developed Group: 47328
-Percentage of Retracted Works for Non-Developed Group: 0.14%
-Number of Retracted Works for Developed Group: 584
-Total Number of Works for Developed Group: 1512222
-Percentage of Retracted Works for Developed Group: 0.04%

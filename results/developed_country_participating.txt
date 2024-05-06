@@ -1,3 +1,0 @@
-Statistical Test Result:
-T-statistic: 38.214942193202454
-P-value: 0.0

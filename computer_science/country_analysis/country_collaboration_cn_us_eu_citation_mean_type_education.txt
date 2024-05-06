@@ -1,7 +1,0 @@
-US mean citations: 40.25206533056689
-EU mean citations: 20.466300023931115
-CN mean citations: 13.835153147024018
-US-EU mean citations: 35.69518256218363
-US-CN mean citations: 25.82062406982317
-EU-CN mean citations: 22.24634163751874
-EU-CN-US mean citations: 32.73450336071695

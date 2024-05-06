@@ -1,4 +1,0 @@
-Spearman test for Developed selected_countries - SignificanceResult(statistic=-0.9162368714078836, pvalue=0.0)
-Pearson test for Developed selected_countries - PearsonRResult(statistic=-0.858479998297871, pvalue=0.0)
-Spearman test for NO developed selected_countries - SignificanceResult(statistic=-0.23319268180630684, pvalue=6.561909498695132e-81)
-Pearson test for NO developed selected_countries - PearsonRResult(statistic=-0.1868391699954354, pvalue=4.354694272398933e-52)

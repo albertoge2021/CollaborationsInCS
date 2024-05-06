@@ -1,0 +1,2 @@
+Shapiro-Wilk Test for Normality: W(67) = 0.452, p = 0.000
+Spearman Correlation: r(65) = -0.610, p = 0.000

@@ -1,0 +1,8 @@
+ANOVA Result:
+F-value: 2552.4469247117418
+p-value: 0.0
+Degrees of Freedom (between groups): 6
+Degrees of Freedom (within groups): 5362003
+
+APA Format:
+F(6, 5362003) = 2552.4469247117418, p < .05

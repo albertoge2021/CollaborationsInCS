@@ -1,7 +1,0 @@
-US - US only collaboration 748132
-CN - CN only collaboration 672256
-EU - EU only collaboration 678427
-CN - US collaboration 65978
-CN - EU collaboration 24024
-EU - US collaboration 68861
-EU - US - CN collaboration 2648
